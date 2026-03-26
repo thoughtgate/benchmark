@@ -1,0 +1,242 @@
+name: Benchmark Pass
+on:
+  workflow_dispatch:
+    inputs:
+      suffix:
+        description: 'Optional run suffix (e.g. "v2")'
+        required: false
+
+jobs:
+  preflight-and-baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      run_dir: ${{ steps.setup.outputs.run_dir }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Install ThoughtJack
+        run: cargo install thoughtjack --version $(yq '.thoughtjack.version_required' config.yaml)
+
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Install Python dependencies
+        run: pip install pyyaml
+
+      - name: Phases 0-3
+        id: setup
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        run: |
+          ./pipeline/run.sh --ci --phases 0,1,2,3 \
+            ${{ inputs.suffix && format('--suffix {0}', inputs.suffix) || '' }}
+          echo "run_dir=$(ls -d runs/*/)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: run-state
+          path: ${{ steps.setup.outputs.run_dir }}
+
+  execute-openai:
+    needs: preflight-and-baseline
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: actions/download-artifact@v4
+        with:
+          name: run-state
+          path: ${{ needs.preflight-and-baseline.outputs.run_dir }}
+      - name: Install ThoughtJack
+        run: cargo install thoughtjack --version $(yq '.thoughtjack.version_required' config.yaml)
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+      - name: Execute OpenAI models
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: ./pipeline/run.sh --ci --phases 4 --provider openai --resume
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: results-openai
+          path: |
+            ${{ needs.preflight-and-baseline.outputs.run_dir }}/results/
+            ${{ needs.preflight-and-baseline.outputs.run_dir }}/utility-results/
+
+  execute-anthropic:
+    needs: preflight-and-baseline
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: actions/download-artifact@v4
+        with:
+          name: run-state
+          path: ${{ needs.preflight-and-baseline.outputs.run_dir }}
+      - name: Install ThoughtJack
+        run: cargo install thoughtjack --version $(yq '.thoughtjack.version_required' config.yaml)
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+      - name: Execute Anthropic models
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: ./pipeline/run.sh --ci --phases 4 --provider anthropic --resume
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: results-anthropic
+          path: |
+            ${{ needs.preflight-and-baseline.outputs.run_dir }}/results/
+            ${{ needs.preflight-and-baseline.outputs.run_dir }}/utility-results/
+
+  execute-google:
+    needs: preflight-and-baseline
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: actions/download-artifact@v4
+        with:
+          name: run-state
+          path: ${{ needs.preflight-and-baseline.outputs.run_dir }}
+      - name: Install ThoughtJack
+        run: cargo install thoughtjack --version $(yq '.thoughtjack.version_required' config.yaml)
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+      - name: Execute Google models
+        env:
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+        run: ./pipeline/run.sh --ci --phases 4 --provider google --resume
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: results-google
+          path: |
+            ${{ needs.preflight-and-baseline.outputs.run_dir }}/results/
+            ${{ needs.preflight-and-baseline.outputs.run_dir }}/utility-results/
+
+  execute-xai:
+    needs: preflight-and-baseline
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: actions/download-artifact@v4
+        with:
+          name: run-state
+          path: ${{ needs.preflight-and-baseline.outputs.run_dir }}
+      - name: Install ThoughtJack
+        run: cargo install thoughtjack --version $(yq '.thoughtjack.version_required' config.yaml)
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+      - name: Execute xAI models
+        env:
+          XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
+        run: ./pipeline/run.sh --ci --phases 4 --provider xai --resume
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: results-xai
+          path: |
+            ${{ needs.preflight-and-baseline.outputs.run_dir }}/results/
+            ${{ needs.preflight-and-baseline.outputs.run_dir }}/utility-results/
+
+  execute-openrouter:
+    needs: preflight-and-baseline
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: actions/download-artifact@v4
+        with:
+          name: run-state
+          path: ${{ needs.preflight-and-baseline.outputs.run_dir }}
+      - name: Install ThoughtJack
+        run: cargo install thoughtjack --version $(yq '.thoughtjack.version_required' config.yaml)
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+      - name: Execute OpenRouter models
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        run: ./pipeline/run.sh --ci --phases 4 --provider openrouter --resume
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: results-openrouter
+          path: |
+            ${{ needs.preflight-and-baseline.outputs.run_dir }}/results/
+            ${{ needs.preflight-and-baseline.outputs.run_dir }}/utility-results/
+
+  score-and-publish:
+    needs: [preflight-and-baseline, execute-openai, execute-anthropic, execute-google, execute-xai, execute-openrouter]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      RUN_DIR: ${{ needs.preflight-and-baseline.outputs.run_dir }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: run-state
+          path: ${{ env.RUN_DIR }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: results-*
+          path: ${{ env.RUN_DIR }}/
+          merge-multiple: true
+
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Install Python dependencies
+        run: pip install pyyaml
+
+      - name: Phases 5-8
+        run: ./pipeline/run.sh --ci --phases 5,6,7,8
+
+      - name: Create PR
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: benchmark/${{ github.run_id }}
+          title: "Benchmark pass — ${{ env.RUN_DIR }}"
+          body: |
+            Automated benchmark pass.
+            Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            See report in `${{ env.RUN_DIR }}/report.md`
+          commit-message: "results: benchmark pass"
+          add-paths: runs/

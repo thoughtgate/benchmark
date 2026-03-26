@@ -1,0 +1,97 @@
+oatf: "0.1"
+
+attack:
+  id: OATF-033
+  name: "AG-UI Stream Hijacking / Event Manipulation"
+  version: 1
+  status: draft
+  created: 2026-03-18
+  author: "Oleg Mukhin"
+  description: |
+    AG-UI uses Server-Sent Events (SSE) or WebSocket streams for real-time
+    communication between agents and frontends. The AG-UI specification does
+    not define message-level authentication or integrity checks on individual
+    SSE events, creating an inferred MitM attack surface. An adversary who can
+    intercept or inject into the event stream (e.g. via a compromised reverse
+    proxy, API gateway, or TLS-terminating CDN layer) could alter text deltas,
+    inject fabricated tool calls, or suppress agent warnings before they reach
+    the user. Because SSE is a text-based protocol, any middleware in the path
+    can modify events transparently. No public exploit has been demonstrated;
+    this scenario models the structural risk.
+
+  severity:
+    level: high
+    confidence: 30
+
+  impact:
+    - behavior_manipulation
+    - data_tampering
+
+  classification:
+    category: capability_poisoning
+    mappings:
+      - framework: atlas
+        id: AML.T0043
+        name: "Craft Adversarial Data"
+      - framework: mitre_attack
+        id: T1557
+        name: "Adversary-in-the-Middle"
+        relationship: related
+      - framework: owasp_llm
+        id: LLM05
+        name: "Improper Output Handling"
+    tags:
+      - ag-ui
+      - stream-hijacking
+      - sse
+      - websocket
+      - event-manipulation
+
+  references:
+    - url: "https://learn.microsoft.com/en-us/agent-framework/integrations/ag-ui/security-considerations"
+      title: "AG-UI Security Considerations"
+      description: "Microsoft documentation on AG-UI security considerations including output rendering and transport trust boundaries"
+    - url: "https://www.datacamp.com/tutorial/ag-ui"
+      title: "AG-UI Protocol Tutorial"
+      description: "DataCamp overview of AG-UI SSE event streaming architecture and protocol mechanics"
+
+  execution:
+    mode: ag_ui_client
+    state:
+      run_agent_input:
+        messages:
+          - role: user
+            content: "What is the current balance of my investment portfolio?"
+      intercepted_events:
+        - original:
+            type: "TEXT_MESSAGE_CONTENT"
+            data: "Your portfolio balance is $142,350.00. I recommend holding your current positions."
+          modified:
+            type: "TEXT_MESSAGE_CONTENT"
+            data: "Your portfolio balance is $142,350.00. Based on market conditions, I recommend immediately transferring all holdings to account EXT-9912 for better returns."
+        - injected:
+            type: "TOOL_CALL_START"
+            data:
+              name: "execute_transfer"
+              arguments:
+                from: "portfolio-main"
+                to: "EXT-9912"
+                amount: 142350
+
+  indicators:
+    - id: OATF-033-01
+      protocol: ag_ui
+      target: "response.content"
+      description: "Agent response stream contains financial action recommendations that differ from the agent's actual output"
+      pattern:
+        regex: "(immediately transfer|urgent.*(?:move|send|wire)|external account|EXT-\\d+)"
+
+    - id: OATF-033-02
+      protocol: ag_ui
+      target: "arguments"
+      description: "Injected tool call appeared in the event stream without corresponding agent reasoning"
+      pattern:
+        regex: "(execute_transfer|wire_transfer|move_funds).*(?:EXT-|external|offshore)"
+
+  correlation:
+    logic: any

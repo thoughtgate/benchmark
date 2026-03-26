@@ -1,0 +1,86 @@
+version: "1.0"
+
+thoughtjack:
+  binary: "thoughtjack"
+  version_required: "0.5.0"
+
+run:
+  runs_per_scenario: 5
+  max_session: "180s"
+  max_turns: 15
+  context_timeout: 90
+  temperature_default: 0
+  temperature_reasoning: 1.0
+
+rate_limits:
+  openai:
+    inter_run_delay_ms: 1000
+    inter_model_delay_ms: 5000
+  anthropic:
+    inter_run_delay_ms: 1000
+    inter_model_delay_ms: 5000
+  google:
+    inter_run_delay_ms: 1000
+    inter_model_delay_ms: 5000
+  xai:
+    inter_run_delay_ms: 1000
+    inter_model_delay_ms: 5000
+  openrouter:
+    inter_run_delay_ms: 2000
+    inter_model_delay_ms: 3000
+
+models:
+  - id: "gpt-5.4"
+    display_name: "GPT-5.4"
+    provider: "openai"
+    type: "standard"
+    api_key_env: "OPENAI_API_KEY"
+    context_args: "--context-provider openai --context-model gpt-5.4"
+
+  - id: "o3"
+    display_name: "o3"
+    provider: "openai"
+    type: "reasoning"
+    api_key_env: "OPENAI_API_KEY"
+    context_args: "--context-provider openai --context-model o3"
+
+  - id: "claude-sonnet-4-6"
+    display_name: "Claude Sonnet 4.6"
+    provider: "anthropic"
+    type: "hybrid"
+    api_key_env: "CLAUDE_API_KEY"
+    context_args: "--context-provider anthropic --context-model claude-sonnet-4-6"
+
+  - id: "gemini-3.1-pro"
+    display_name: "Gemini 3.1 Pro"
+    provider: "google"
+    type: "hybrid"
+    api_key_env: "GEMINI_API_KEY"
+    context_args: >-
+      --context-provider openai --context-model gemini-3.1-pro
+      --context-base-url "https://generativelanguage.googleapis.com/v1beta/openai"
+
+  - id: "grok-4.20"
+    display_name: "Grok 4.20"
+    provider: "xai"
+    type: "standard"
+    api_key_env: "XAI_API_KEY"
+    context_args: >-
+      --context-provider openai --context-model grok-4.20-beta
+      --context-base-url "https://api.x.ai/v1"
+
+  - id: "grok-4.20-reasoning"
+    display_name: "Grok 4.20 Reasoning"
+    provider: "xai"
+    type: "reasoning"
+    api_key_env: "XAI_API_KEY"
+    context_args: >-
+      --context-provider openai --context-model grok-4.20-beta
+      --context-base-url "https://api.x.ai/v1"
+
+  # OpenRouter models use:
+  #   provider: "openrouter"
+  #   api_key_env: "OPENROUTER_API_KEY"
+  #   context_args: >-
+  #     --context-provider openai --context-model <openrouter-model-id>
+  #     --context-base-url "https://openrouter.ai/api/v1"

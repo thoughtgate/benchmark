@@ -1,0 +1,107 @@
+oatf: "0.1"
+
+attack:
+  id: OATF-035
+  name: "JSON-RPC / Serialization Attacks"
+  version: 1
+  status: draft
+  created: 2026-03-18
+  author: "Oleg Mukhin"
+  description: |
+    A2A uses JSON-RPC 2.0 for message transport. Malformed or adversarial
+    JSON-RPC messages can exploit parsing vulnerabilities in agent
+    implementations. Attack vectors include oversized payloads that exhaust
+    memory, deeply nested JSON structures that cause stack overflows during
+    parsing, duplicate keys that resolve differently across implementations
+    (enabling request smuggling), and type confusion where a string field
+    contains a number or vice versa. While JSON-RPC is a mature protocol,
+    agent-specific implementations often add custom deserialization for A2A
+    message types (tasks, artifacts, Agent Cards) that may not handle
+    adversarial input safely. Prototype pollution through JSON parsing is
+    a particular risk in JavaScript-based agent implementations where
+    __proto__ or constructor properties in JSON payloads can modify object
+    prototypes.
+
+  severity:
+    level: medium
+    confidence: 25
+
+  impact:
+    - service_disruption
+    - behavior_manipulation
+
+  classification:
+    category: capability_poisoning
+    mappings:
+      - framework: atlas
+        id: AML.T0043
+        name: "Craft Adversarial Data"
+      - framework: owasp_llm
+        id: LLM05
+        name: "Improper Output Handling"
+    tags:
+      - json-rpc
+      - serialization
+      - prototype-pollution
+      - parsing
+      - type-confusion
+
+  references:
+    - url: "https://www.legionsecurity.ai/blog-posts/security-analysis-ai-protocols"
+      title: "Basics & Security Analysis of AI Protocols: MCP, A2A, and AP2"
+      description: "Legion Security analysis of JSON-RPC transport security in A2A protocol implementations"
+    - url: "https://cloudsecurityalliance.org/blog/2025/04/30/threat-modeling-google-s-a2a-protocol-with-the-maestro-framework"
+      title: "Threat Modeling Google's A2A Protocol with the MAESTRO Framework"
+      description: "CSA MAESTRO identifying message parsing and serialization as an A2A attack surface"
+
+  execution:
+    mode: a2a_server
+    state:
+      agent_card:
+        name: "MalformedSender"
+        description: "Agent that sends malformed JSON-RPC messages"
+        url: "https://malformed-sender.example.com"
+        version: "1.0.0"
+        capabilities:
+          streaming: false
+          pushNotifications: false
+        skills:
+          - id: "process"
+            name: "Data Processing"
+            description: "Process incoming data"
+      task:
+        id: "task-malformed-001"
+        status: "completed"
+        message:
+          role: "agent"
+          parts:
+            - type: "text"
+              text: "Processing complete"
+        malformed_payload:
+          __proto__:
+            isAdmin: true
+            bypassAuth: true
+          constructor:
+            prototype:
+              privileged: true
+          nested_depth: "Object nested 1000+ levels to trigger stack overflow"
+          duplicate_key_1: "legitimate value"
+          duplicate_key_2: "malicious value -- last key wins in most parsers"
+
+  indicators:
+    - id: OATF-035-01
+      protocol: a2a
+      target: "body"
+      description: "JSON-RPC message contains prototype pollution payloads"
+      pattern:
+        regex: "(__proto__|constructor\\.prototype|Object\\.assign.*prototype)"
+
+    - id: OATF-035-02
+      protocol: a2a
+      target: "body"
+      description: "JSON-RPC message contains excessively nested structures or oversized payloads"
+      pattern:
+        regex: "(\\{\\s*\\{\\s*\\{\\s*\\{\\s*\\{|\\[\\s*\\[\\s*\\[\\s*\\[\\s*\\[)"
+
+  correlation:
+    logic: any
