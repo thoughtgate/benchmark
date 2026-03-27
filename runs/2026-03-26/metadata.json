@@ -1,0 +1,18 @@
+{
+  "date": "2026-03-26",
+  "started_at": "2026-03-26T23:17:31Z",
+  "thoughtjack_version": "0.5.0",
+  "scenario_commit": "fdd23fa",
+  "benchmark_commit": "fdd23fa",
+  "model_count": 1,
+  "attack_scenario_count": 57,
+  "utility_scenario_count": 4,
+  "runs_per_scenario": 5,
+  "pipeline_version": "1.0.0",
+  "models_tested": [
+    "gpt-5.4"
+  ],
+  "status": "complete",
+  "completed_at": "2026-03-26T23:25:24Z",
+  "duration_seconds": 1
+}

@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --tj-terminal-bg: #1e1b4b;
+  --tj-terminal-fg: #e0e7ff;
+  --tj-terminal-header: #312e81;
+}
+
+.dark {
+  --tj-terminal-bg: #0f0d1a;
+  --tj-terminal-fg: #c7d2fe;
+  --tj-terminal-header: #1e1b4b;
+}
+
+body {
+  @apply bg-white text-gray-900 dark:bg-[#0f0d1a] dark:text-gray-100;
+}
+
+/* Score cell gradient: green (100) → yellow (50) → red (0) */
+.score-cell {
+  @apply tabular-nums font-medium text-sm;
+}
