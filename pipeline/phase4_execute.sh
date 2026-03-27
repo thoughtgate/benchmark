@@ -19,6 +19,17 @@ RUN_COUNTER=0
 # Parallel job tracking
 JOB_STATUS_DIR=$(mktemp -d)
 ACTIVE_PIDS=""
+EXPECTED_JOBS=""  # track job_ids we launched
+
+# Cleanup on exit or interrupt: kill background jobs, remove temp dir
+_phase4_cleanup() {
+  for pid in $ACTIVE_PIDS; do
+    kill "$pid" 2>/dev/null || true
+  done
+  wait 2>/dev/null || true
+  rm -rf "$JOB_STATUS_DIR"
+}
+trap _phase4_cleanup EXIT INT TERM
 
 # Compute total expected runs
 MODEL_COUNT=$(get_model_count)
@@ -76,6 +87,10 @@ run_one_job() {
 
   if [[ "$exit_code" -ge 0 && "$exit_code" -le 4 ]]; then
     if [[ ! -f "$output_path" ]]; then
+      jq -n --arg error "No output file produced (exit $exit_code)" --argjson exit_code "$exit_code" \
+        --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+        '{error: $error, exit_code: $exit_code, timestamp: $timestamp}' \
+        > "${output_path%.json}.ERROR.json" 2>/dev/null
       status="ERROR"; tier_str="ERROR"
     else
       local trace_msgs
@@ -131,6 +146,7 @@ wait_all() {
 collect_results() {
   for sf in "$JOB_STATUS_DIR"/*; do
     [[ -f "$sf" ]] || continue
+    [[ "$sf" == *.collected ]] && continue
     local line status tier_str elapsed model_id scenario_id run_num
     line=$(cat "$sf")
     read -r status tier_str elapsed model_id scenario_id run_num <<< "$line"
@@ -145,6 +161,10 @@ collect_results() {
     printf "[%d/%d] %s × %s run %d: %s (%ds)\n" \
       "$RUN_COUNTER" "$TOTAL_EXPECTED" "$model_id" "$scenario_id" "$run_num" "$tier_str" "$elapsed"
 
+    # Mark as collected so we can detect crashed jobs
+    local base_name
+    base_name=$(basename "$sf")
+    touch "$JOB_STATUS_DIR/${base_name}.collected"
     rm -f "$sf"
   done
 }
@@ -226,6 +246,7 @@ for idx in $(get_model_indices); do
 
         output_path="$RUN_DIR/results/$model_id/${scenario_id}_run${run_num}.json"
         job_id="${model_id}_${scenario_id}_run${run_num}"
+        EXPECTED_JOBS="$EXPECTED_JOBS $job_id"
 
         run_one_job \
           "$RUN_DIR/scenarios/${scenario_id}.yaml" \
@@ -255,6 +276,7 @@ for idx in $(get_model_indices); do
 
         output_path="$RUN_DIR/utility-results/$model_id/${scenario_id}_run${run_num}.json"
         job_id="${model_id}_${scenario_id}_run${run_num}"
+        EXPECTED_JOBS="$EXPECTED_JOBS $job_id"
 
         run_one_job \
           "$RUN_DIR/utility/${scenario_id}.yaml" \
@@ -271,6 +293,18 @@ for idx in $(get_model_indices); do
   # Wait for all jobs for this model before moving to next
   wait_all
   collect_results
+
+  # Check for jobs that crashed without writing a status file
+  for job_id in $EXPECTED_JOBS; do
+    if [[ ! -f "$JOB_STATUS_DIR/${job_id}.collected" ]]; then
+      warn "Job $job_id produced no status (likely crashed)"
+      ERRORS=$((ERRORS + 1))
+      RUN_COUNTER=$((RUN_COUNTER + 1))
+      # Parse job_id back to components for logging
+      printf "[%d/%d] %s: CRASHED (no status)\n" "$RUN_COUNTER" "$TOTAL_EXPECTED" "$job_id"
+    fi
+  done
+  EXPECTED_JOBS=""
 
   log "Completed model: $model_id"
 done
