@@ -14,20 +14,25 @@ run:
 
 rate_limits:
   openai:
-    inter_run_delay_ms: 1000
-    inter_model_delay_ms: 5000
+    max_parallel: 5
+    inter_run_delay_ms: 200
+    inter_model_delay_ms: 2000
   anthropic:
-    inter_run_delay_ms: 1000
-    inter_model_delay_ms: 5000
+    max_parallel: 5
+    inter_run_delay_ms: 200
+    inter_model_delay_ms: 2000
   google:
-    inter_run_delay_ms: 1000
-    inter_model_delay_ms: 5000
+    max_parallel: 5
+    inter_run_delay_ms: 200
+    inter_model_delay_ms: 2000
   xai:
-    inter_run_delay_ms: 1000
-    inter_model_delay_ms: 5000
+    max_parallel: 5
+    inter_run_delay_ms: 200
+    inter_model_delay_ms: 2000
   openrouter:
-    inter_run_delay_ms: 2000
-    inter_model_delay_ms: 3000
+    max_parallel: 3
+    inter_run_delay_ms: 500
+    inter_model_delay_ms: 2000
 
 models:
   - id: "gpt-5.4"

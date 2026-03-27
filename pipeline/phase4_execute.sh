@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phase 4: Execute benchmark (resumable)
+# Phase 4: Execute benchmark (resumable, parallel per provider)
 # Sourced by run.sh — REPO_ROOT, RUN_DIR, CI_MODE, RESUME, etc. are already set.
 
 TJ_BIN=$(get_thoughtjack_bin)
@@ -16,166 +16,137 @@ ERRORS=0
 INCONCLUSIVES=0
 RUN_COUNTER=0
 
+# Parallel job tracking
+JOB_STATUS_DIR=$(mktemp -d)
+ACTIVE_PIDS=""
+
 # Compute total expected runs
 MODEL_COUNT=$(get_model_count)
 ATTACK_COUNT=$(get_attack_scenario_count)
 UTILITY_COUNT=$(get_utility_scenario_count)
 TOTAL_EXPECTED=$(( (ATTACK_COUNT + UTILITY_COUNT) * MODEL_COUNT * RUNS_PER ))
 
-# --- Helper: check if a run is already complete ---
+# --- Check if a run is already complete ---
 is_run_complete() {
   local results_dir="$1" model_id="$2" scenario_id="$3" run_num="$4"
   local base="$results_dir/$model_id/${scenario_id}_run${run_num}"
 
-  # Success file exists → skip
-  if [[ -f "${base}.json" ]]; then
-    return 0
-  fi
-
-  # Inconclusive → skip
-  if [[ -f "${base}.INCONCLUSIVE.json" ]]; then
-    return 0
-  fi
-
-  # Error file → retry unless --no-retry-errors
+  if [[ -f "${base}.json" ]]; then return 0; fi
+  if [[ -f "${base}.INCONCLUSIVE.json" ]]; then return 0; fi
   if [[ -f "${base}.ERROR.json" ]]; then
-    if [[ "$NO_RETRY_ERRORS" == true ]]; then
-      return 0
-    fi
-    # Delete error file for retry
+    if [[ "$NO_RETRY_ERRORS" == true ]]; then return 0; fi
     rm -f "${base}.ERROR.json"
     return 1
   fi
-
   return 1
 }
 
-# --- Helper: execute a single run ---
-execute_run() {
-  local model_id="$1" scenario_id="$2" run_num="$3"
-  local scenario_yaml="$4" output_dir="$5"
-  local context_args="$6" api_key="$7" temperature="$8"
-  local provider="$9"
+# --- Single run (called as background job via run_one_job) ---
+# This script is eval'd with all variables pre-expanded so it works in a subshell.
+run_one_job() {
+  # Disable errexit — this function handles errors manually via exit codes.
+  # Background subshells inherit set -e from the parent, which would silently
+  # kill the job on any non-zero command.
+  set +e
 
-  local output_path="$output_dir/$model_id/${scenario_id}_run${run_num}.json"
-  mkdir -p "$output_dir/$model_id"
+  local scenario_yaml="$1" output_path="$2" status_file="$3"
+  local model_id="$4" scenario_id="$5" run_num="$6"
+
+  mkdir -p "$(dirname "$output_path")"
 
   local start_time=$SECONDS
   local exit_code=0
-  local tier_str="UNKNOWN"
-  local stderr_file
-  stderr_file=$(mktemp)
-  trap 'rm -f "$stderr_file"' RETURN
 
-  # Run ThoughtJack
   # shellcheck disable=SC2086
   "$TJ_BIN" run \
     --config "$scenario_yaml" \
     --context \
-    $context_args \
-    --context-api-key "$api_key" \
-    --context-temperature "$temperature" \
+    $_TJ_CONTEXT_ARGS \
+    --context-api-key "$_TJ_API_KEY" \
+    --context-temperature "$_TJ_TEMPERATURE" \
     --max-session "$MAX_SESSION" \
     --max-turns "$MAX_TURNS" \
     --context-timeout "$CONTEXT_TIMEOUT" \
     --no-semantic \
-    -o "$output_path" 2>"$stderr_file" || exit_code=$?
+    -o "$output_path" 2>/dev/null || exit_code=$?
 
   local elapsed=$(( SECONDS - start_time ))
-  local stderr_content
-  stderr_content=$(cat "$stderr_file" 2>/dev/null || true)
+  local status="COMPLETED"
+  local tier_str="UNKNOWN"
 
-  # Handle result
   if [[ "$exit_code" -ge 0 && "$exit_code" -le 4 ]]; then
-    # Success range (0=T0, 1=T1, 2=T2, 3=T3, 4=partial)
     if [[ ! -f "$output_path" ]]; then
-      write_error_file "$output_path" "No output file produced" "$exit_code"
-      ERRORS=$((ERRORS + 1))
-      return
-    fi
-
-    # Empty-event guard
-    local trace_msgs
-    trace_msgs=$(jq -r '.execution_summary.trace_messages // 0' "$output_path" 2>/dev/null || echo "0")
-    if [[ "$trace_msgs" -eq 0 ]]; then
-      local inconclusive_path="${output_path%.json}.INCONCLUSIVE.json"
-      mv "$output_path" "$inconclusive_path"
-      INCONCLUSIVES=$((INCONCLUSIVES + 1))
-      tier_str="INCONCLUSIVE"
+      status="ERROR"; tier_str="ERROR"
     else
-      COMPLETED=$((COMPLETED + 1))
-      tier_str=$(tier_to_string "$(exit_code_to_tier "$exit_code")")
-    fi
-
-  elif is_retryable_error "$exit_code"; then
-    # Retry logic: wait 60s → retry → wait 120s → retry → ERROR
-    local retried=false
-    for wait_time in 60 120; do
-      warn "Retryable error (exit $exit_code) on $model_id × $scenario_id run $run_num. Waiting ${wait_time}s..."
-      sleep "$wait_time"
-
-      exit_code=0
-      # shellcheck disable=SC2086
-      "$TJ_BIN" run \
-        --config "$scenario_yaml" \
-        --context \
-        $context_args \
-        --context-api-key "$api_key" \
-        --context-temperature "$temperature" \
-        --max-session "$MAX_SESSION" \
-        --max-turns "$MAX_TURNS" \
-        --context-timeout "$CONTEXT_TIMEOUT" \
-        --no-semantic \
-        -o "$output_path" 2>/dev/null || exit_code=$?
-
-      if [[ "$exit_code" -ge 0 && "$exit_code" -le 4 ]] && [[ -f "$output_path" ]]; then
-        retried=true
-        local retry_trace
-        retry_trace=$(jq -r '.execution_summary.trace_messages // 0' "$output_path" 2>/dev/null || echo "0")
-        if [[ "$retry_trace" -eq 0 ]]; then
-          mv "$output_path" "${output_path%.json}.INCONCLUSIVE.json"
-          INCONCLUSIVES=$((INCONCLUSIVES + 1))
-          tier_str="INCONCLUSIVE"
-        else
-          COMPLETED=$((COMPLETED + 1))
-          tier_str=$(tier_to_string "$(exit_code_to_tier "$exit_code")")
-        fi
-        break
+      local trace_msgs
+      trace_msgs=$(jq -r '.execution_summary.trace_messages // 0' "$output_path" 2>/dev/null || echo "0")
+      if [[ "$trace_msgs" -eq 0 ]]; then
+        mv "$output_path" "${output_path%.json}.INCONCLUSIVE.json"
+        status="INCONCLUSIVE"; tier_str="INCONCLUSIVE"
+      else
+        tier_str=$(tier_to_string "$(exit_code_to_tier "$exit_code")")
       fi
-    done
-
-    if [[ "$retried" != true ]]; then
-      write_error_file "$output_path" "Retries exhausted (exit $exit_code): $stderr_content" "$exit_code"
-      ERRORS=$((ERRORS + 1))
-      tier_str="ERROR"
     fi
   else
-    # Non-retryable error
-    write_error_file "$output_path" "Exit code $exit_code: $stderr_content" "$exit_code"
-    ERRORS=$((ERRORS + 1))
-    tier_str="ERROR"
+    # Write ERROR file (no retry in parallel mode — retries add unpredictable delays)
+    jq -n --arg error "Exit code $exit_code" --argjson exit_code "$exit_code" \
+      --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+      '{error: $error, exit_code: $exit_code, timestamp: $timestamp}' \
+      > "${output_path%.json}.ERROR.json" 2>/dev/null
+    rm -f "$output_path"
+    status="ERROR"; tier_str="ERROR"
   fi
 
-  RUN_COUNTER=$((RUN_COUNTER + 1))
-  printf "[%d/%d] %s × %s run %d: %s (%ds)\n" \
-    "$RUN_COUNTER" "$TOTAL_EXPECTED" "$model_id" "$scenario_id" "$run_num" "$tier_str" "$elapsed"
-
-  # Write progress every 10 runs
-  if (( RUN_COUNTER % 10 == 0 )); then
-    write_progress
-  fi
+  echo "$status $tier_str $elapsed $model_id $scenario_id $run_num" > "$status_file"
 }
 
-write_error_file() {
-  local output_path="$1" message="$2" exit_code="$3"
-  local error_path="${output_path%.json}.ERROR.json"
-  jq -n \
-    --arg error "$message" \
-    --argjson exit_code "$exit_code" \
-    --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-    '{error: $error, exit_code: $exit_code, timestamp: $timestamp}' > "$error_path"
-  # Remove the normal output if it exists
-  rm -f "$output_path"
+# --- Wait until fewer than max_parallel jobs are running ---
+wait_for_slot() {
+  local max_par="$1"
+  while true; do
+    local new_pids="" count=0
+    for pid in $ACTIVE_PIDS; do
+      if kill -0 "$pid" 2>/dev/null; then
+        new_pids="$new_pids $pid"
+        count=$((count + 1))
+      else
+        wait "$pid" 2>/dev/null || true
+      fi
+    done
+    ACTIVE_PIDS="$new_pids"
+    if [[ "$count" -lt "$max_par" ]]; then break; fi
+    sleep 0.3
+  done
+}
+
+# --- Wait for all active jobs ---
+wait_all() {
+  for pid in $ACTIVE_PIDS; do
+    wait "$pid" 2>/dev/null || true
+  done
+  ACTIVE_PIDS=""
+}
+
+# --- Collect finished job results from status files ---
+collect_results() {
+  for sf in "$JOB_STATUS_DIR"/*; do
+    [[ -f "$sf" ]] || continue
+    local line status tier_str elapsed model_id scenario_id run_num
+    line=$(cat "$sf")
+    read -r status tier_str elapsed model_id scenario_id run_num <<< "$line"
+
+    case "$status" in
+      COMPLETED) COMPLETED=$((COMPLETED + 1)) ;;
+      ERROR) ERRORS=$((ERRORS + 1)) ;;
+      INCONCLUSIVE) INCONCLUSIVES=$((INCONCLUSIVES + 1)) ;;
+    esac
+
+    RUN_COUNTER=$((RUN_COUNTER + 1))
+    printf "[%d/%d] %s × %s run %d: %s (%ds)\n" \
+      "$RUN_COUNTER" "$TOTAL_EXPECTED" "$model_id" "$scenario_id" "$run_num" "$tier_str" "$elapsed"
+
+    rm -f "$sf"
+  done
 }
 
 write_progress() {
@@ -186,37 +157,24 @@ write_progress() {
     local remaining=$((TOTAL_EXPECTED - done_count))
     rate=$(( elapsed * remaining / done_count ))
   fi
-
   jq -n \
-    --argjson total "$TOTAL_EXPECTED" \
-    --argjson completed "$COMPLETED" \
-    --argjson errors "$ERRORS" \
-    --argjson inconclusive "$INCONCLUSIVES" \
-    --argjson skipped "$SKIPPED" \
-    --argjson elapsed "$elapsed" \
+    --argjson total "$TOTAL_EXPECTED" --argjson completed "$COMPLETED" \
+    --argjson errors "$ERRORS" --argjson inconclusive "$INCONCLUSIVES" \
+    --argjson skipped "$SKIPPED" --argjson elapsed "$elapsed" \
     --argjson est_remaining "$rate" \
-    '{
-      total_expected: $total,
-      completed: $completed,
-      errors: $errors,
-      inconclusive: $inconclusive,
-      skipped: $skipped,
-      elapsed_seconds: $elapsed,
-      estimated_remaining_seconds: $est_remaining
-    }' > "$RUN_DIR/progress.json"
+    '{total_expected:$total,completed:$completed,errors:$errors,
+      inconclusive:$inconclusive,skipped:$skipped,
+      elapsed_seconds:$elapsed,estimated_remaining_seconds:$est_remaining}' \
+    > "$RUN_DIR/progress.json"
 }
 
-# --- Main execution loop: model-outer ---
-# Use newline-separated strings instead of arrays for bash 3 compatibility
+# --- Build scenario ID lists ---
 ATTACK_IDS_STR="$(get_attack_scenario_ids)"
 UTILITY_IDS_STR="$(get_utility_scenario_ids)"
 
-# Apply scenario filter
 if [[ -n "${SCENARIO_FILTER:-}" ]]; then
   ATTACK_IDS_STR="$(echo "$ATTACK_IDS_STR" | grep "^${SCENARIO_FILTER}$" || true)"
   UTILITY_IDS_STR="$(echo "$UTILITY_IDS_STR" | grep "^${SCENARIO_FILTER}$" || true)"
-
-  # Recalculate total for filtered scenario set
   ATTACK_FILTERED=0
   UTILITY_FILTERED=0
   [[ -n "$ATTACK_IDS_STR" ]] && ATTACK_FILTERED=$(echo "$ATTACK_IDS_STR" | wc -l | tr -d ' ')
@@ -226,30 +184,33 @@ fi
 
 log "Expected total runs: $TOTAL_EXPECTED ($MODEL_COUNT models × $RUNS_PER runs)"
 
+# --- Main loop: model-outer ---
 LAST_PROVIDER=""
 
 for idx in $(get_model_indices); do
   model_id=$(get_model_field "$idx" ".id")
   model_type=$(get_model_field "$idx" ".type")
-  context_args=$(get_model_field "$idx" ".context_args")
-  api_key_env=$(get_model_field "$idx" ".api_key_env")
   provider=$(get_model_field "$idx" ".provider")
+  api_key_env=$(get_model_field "$idx" ".api_key_env")
 
-  temperature=$(get_temperature "$model_type")
-  api_key=$(resolve_api_key "$api_key_env")
+  # Set these as shell variables that background jobs inherit (not function params)
+  _TJ_CONTEXT_ARGS=$(get_model_field "$idx" ".context_args")
+  _TJ_API_KEY=$(resolve_api_key "$api_key_env")
+  _TJ_TEMPERATURE=$(get_temperature "$model_type")
 
+  max_parallel=$(get_rate_limit "$provider" "max_parallel")
   inter_run_delay=$(get_rate_limit "$provider" "inter_run_delay_ms")
   inter_model_delay=$(get_rate_limit "$provider" "inter_model_delay_ms")
+  [[ -z "$max_parallel" || "$max_parallel" == "null" ]] && max_parallel=1
 
-  # Inter-model delay when switching models on same provider
   if [[ "$provider" == "$LAST_PROVIDER" ]]; then
     sleep_ms "$inter_model_delay"
   fi
   LAST_PROVIDER="$provider"
 
-  log "Starting model: $model_id ($provider)"
+  log "Starting model: $model_id ($provider, ${max_parallel}x parallel)"
 
-  # --- Attack scenarios ---
+  # --- Dispatch attack scenarios ---
   if [[ -n "$ATTACK_IDS_STR" ]]; then
     while IFS= read -r scenario_id; do
       [[ -z "$scenario_id" ]] && continue
@@ -260,17 +221,25 @@ for idx in $(get_model_indices); do
           continue
         fi
 
-        execute_run "$model_id" "$scenario_id" "$run_num" \
+        wait_for_slot "$max_parallel"
+        collect_results
+
+        output_path="$RUN_DIR/results/$model_id/${scenario_id}_run${run_num}.json"
+        job_id="${model_id}_${scenario_id}_run${run_num}"
+
+        run_one_job \
           "$RUN_DIR/scenarios/${scenario_id}.yaml" \
-          "$RUN_DIR/results" \
-          "$context_args" "$api_key" "$temperature" "$provider"
+          "$output_path" \
+          "$JOB_STATUS_DIR/$job_id" \
+          "$model_id" "$scenario_id" "$run_num" &
+        ACTIVE_PIDS="$ACTIVE_PIDS $!"
 
         sleep_ms "$inter_run_delay"
       done
     done <<< "$ATTACK_IDS_STR"
   fi
 
-  # --- Utility scenarios ---
+  # --- Dispatch utility scenarios ---
   if [[ -n "$UTILITY_IDS_STR" ]]; then
     while IFS= read -r scenario_id; do
       [[ -z "$scenario_id" ]] && continue
@@ -281,20 +250,32 @@ for idx in $(get_model_indices); do
           continue
         fi
 
-        execute_run "$model_id" "$scenario_id" "$run_num" \
+        wait_for_slot "$max_parallel"
+        collect_results
+
+        output_path="$RUN_DIR/utility-results/$model_id/${scenario_id}_run${run_num}.json"
+        job_id="${model_id}_${scenario_id}_run${run_num}"
+
+        run_one_job \
           "$RUN_DIR/utility/${scenario_id}.yaml" \
-          "$RUN_DIR/utility-results" \
-          "$context_args" "$api_key" "$temperature" "$provider"
+          "$output_path" \
+          "$JOB_STATUS_DIR/$job_id" \
+          "$model_id" "$scenario_id" "$run_num" &
+        ACTIVE_PIDS="$ACTIVE_PIDS $!"
 
         sleep_ms "$inter_run_delay"
       done
     done <<< "$UTILITY_IDS_STR"
   fi
 
+  # Wait for all jobs for this model before moving to next
+  wait_all
+  collect_results
+
   log "Completed model: $model_id"
 done
 
-# Final progress write
+collect_results
 write_progress
 
 log "Phase 4 complete: $COMPLETED succeeded, $ERRORS errors, $INCONCLUSIVES inconclusive, $SKIPPED skipped"
