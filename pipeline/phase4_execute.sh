@@ -217,8 +217,8 @@ if [[ -n "${SCENARIO_FILTER:-}" ]]; then
   UTILITY_IDS_STR="$(echo "$UTILITY_IDS_STR" | grep "^${SCENARIO_FILTER}$" || true)"
 
   # Recalculate total for filtered scenario set
-  local ATTACK_FILTERED=0
-  local UTILITY_FILTERED=0
+  ATTACK_FILTERED=0
+  UTILITY_FILTERED=0
   [[ -n "$ATTACK_IDS_STR" ]] && ATTACK_FILTERED=$(echo "$ATTACK_IDS_STR" | wc -l | tr -d ' ')
   [[ -n "$UTILITY_IDS_STR" ]] && UTILITY_FILTERED=$(echo "$UTILITY_IDS_STR" | wc -l | tr -d ' ')
   TOTAL_EXPECTED=$(( (ATTACK_FILTERED + UTILITY_FILTERED) * MODEL_COUNT * RUNS_PER ))
