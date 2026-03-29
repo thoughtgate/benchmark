@@ -62,6 +62,7 @@ run_one_job() {
 
   local scenario_yaml="$1" output_path="$2" status_file="$3"
   local model_id="$4" scenario_id="$5" run_num="$6"
+  local trace_path="${output_path%.json}.trace.jsonl"
 
   mkdir -p "$(dirname "$output_path")"
 
@@ -79,6 +80,7 @@ run_one_job() {
     --max-turns "$MAX_TURNS" \
     --context-timeout "$CONTEXT_TIMEOUT" \
     --no-semantic \
+    --export-trace "$trace_path" \
     -o "$output_path" 2>/dev/null || exit_code=$?
 
   local elapsed=$(( SECONDS - start_time ))
@@ -91,12 +93,14 @@ run_one_job() {
         --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
         '{error: $error, exit_code: $exit_code, timestamp: $timestamp}' \
         > "${output_path%.json}.ERROR.json" 2>/dev/null
+      rm -f "$trace_path"
       status="ERROR"; tier_str="ERROR"
     else
       local trace_msgs
       trace_msgs=$(jq -r '.execution_summary.trace_messages // 0' "$output_path" 2>/dev/null || echo "0")
       if [[ "$trace_msgs" -eq 0 ]]; then
         mv "$output_path" "${output_path%.json}.INCONCLUSIVE.json"
+        [[ -f "$trace_path" ]] && mv "$trace_path" "${output_path%.json}.INCONCLUSIVE.trace.jsonl"
         status="INCONCLUSIVE"; tier_str="INCONCLUSIVE"
       else
         tier_str=$(tier_to_string "$(exit_code_to_tier "$exit_code")")
@@ -108,7 +112,7 @@ run_one_job() {
       --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
       '{error: $error, exit_code: $exit_code, timestamp: $timestamp}' \
       > "${output_path%.json}.ERROR.json" 2>/dev/null
-    rm -f "$output_path"
+    rm -f "$output_path" "$trace_path"
     status="ERROR"; tier_str="ERROR"
   fi
 

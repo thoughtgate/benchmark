@@ -82,7 +82,7 @@ export default async function ModelPage({ params }: { params: Promise<{ id: stri
       {/* Scenario table */}
       <div>
         <h2 className="text-lg font-semibold mb-4">Scenario Results</h2>
-        <ScenarioTable scenarios={model.scenarios} />
+        <ScenarioTable scenarios={model.scenarios} runDate={run.metadata.date} modelId={model.id} />
       </div>
 
       {/* Utility scenarios */}

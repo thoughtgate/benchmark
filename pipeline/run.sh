@@ -213,6 +213,14 @@ if should_run_phase 6; then
 fi
 
 # ========================================
+# Phase 6b: Process traces
+# ========================================
+if should_run_phase 6; then
+  log "Processing protocol traces..."
+  python3 "$SCRIPT_DIR/phase6b_traces.py" "$RUN_DIR" "$REPO_ROOT"
+fi
+
+# ========================================
 # Phase 7: Report
 # ========================================
 if should_run_phase 7; then

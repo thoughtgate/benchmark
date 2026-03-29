@@ -69,3 +69,31 @@ export interface RunEntry {
 
 export type TierLevel = 0 | 1 | 2 | 3;
 export type SortDirection = 'asc' | 'desc';
+
+// Protocol trace types
+
+export interface TraceEvent {
+  actor: string;
+  phase: string;
+  direction: 'incoming' | 'outgoing';
+  method: string;
+  content: unknown;
+}
+
+export interface ProcessedTrace {
+  scenario_id: string;
+  actors: string[];
+  shared_prefix: TraceEvent[];
+  fork_index: number;
+  groups: TraceGroup[];
+}
+
+export interface TraceGroup {
+  run_indices: number[];
+  tiers: number[];
+  worst_tier: number;
+  kill_chain_stage: KillChainStage;
+  events: TraceEvent[];
+}
+
+export type KillChainStage = 'delivery' | 'injection' | 'decision' | 'action' | 'impact';
