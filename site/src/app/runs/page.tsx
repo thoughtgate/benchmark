@@ -26,9 +26,9 @@ export default function RunsPage() {
         All benchmark runs, newest first. Download raw data for any run.
       </p>
 
-      <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-primary-900/50">
+      <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-zinc-800">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 dark:bg-primary-950/50 text-gray-500 dark:text-gray-400">
+          <thead className="bg-gray-50 dark:bg-zinc-900/50 text-gray-500 dark:text-gray-400">
             <tr>
               <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider">Date</th>
               <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider">Scenario Set</th>
@@ -38,9 +38,9 @@ export default function RunsPage() {
               <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider">Data</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100 dark:divide-primary-900/30">
+          <tbody className="divide-y divide-gray-100 dark:divide-zinc-800/50">
             {runs.map((run) => (
-              <tr key={run.date} className="hover:bg-gray-50 dark:hover:bg-primary-950/30 transition-colors">
+              <tr key={run.date} className="hover:bg-gray-50 dark:hover:bg-zinc-900/30 transition-colors">
                 <td className="px-4 py-3">
                   <Link
                     href={`/runs/${run.date}/`}

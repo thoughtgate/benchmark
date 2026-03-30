@@ -148,10 +148,10 @@ function DivergenceGroup({
   const tierLabel = TIER_LABELS[group.worst_tier] ?? 'Unknown';
 
   return (
-    <div className="border border-gray-200 dark:border-primary-900/50 rounded-lg overflow-hidden">
+    <div className="border border-gray-200 dark:border-zinc-800 rounded-lg overflow-hidden">
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-gray-50 dark:hover:bg-primary-950/30 transition-colors"
+        className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-gray-50 dark:hover:bg-zinc-900/30 transition-colors"
       >
         <span className="text-xs text-gray-400">{expanded ? '\u25BC' : '\u25B6'}</span>
         <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -164,7 +164,7 @@ function DivergenceGroup({
         </span>
       </button>
       {expanded && (
-        <div className="px-4 pb-3 space-y-1.5 border-t border-gray-100 dark:border-primary-900/30 pt-3">
+        <div className="px-4 pb-3 space-y-1.5 border-t border-gray-100 dark:border-zinc-800/50 pt-3">
           {group.events.length === 0 ? (
             <p className="text-xs text-gray-400 italic">No additional messages after shared prefix</p>
           ) : (
@@ -239,9 +239,9 @@ export function TraceViewer({ scenarioId, modelId, runDate, runs, maxTier }: Pro
   if (loading) {
     return (
       <div className="p-6 space-y-3">
-        <div className="h-6 w-64 bg-gray-100 dark:bg-primary-950/30 rounded animate-pulse" />
-        <div className="h-20 bg-gray-100 dark:bg-primary-950/30 rounded animate-pulse" />
-        <div className="h-20 bg-gray-100 dark:bg-primary-950/30 rounded animate-pulse" />
+        <div className="h-6 w-64 bg-gray-100 dark:bg-zinc-900/30 rounded animate-pulse" />
+        <div className="h-20 bg-gray-100 dark:bg-zinc-900/30 rounded animate-pulse" />
+        <div className="h-20 bg-gray-100 dark:bg-zinc-900/30 rounded animate-pulse" />
       </div>
     );
   }
@@ -255,7 +255,7 @@ export function TraceViewer({ scenarioId, modelId, runDate, runs, maxTier }: Pro
   }
 
   return (
-    <div className="p-6 space-y-6 bg-gray-50/50 dark:bg-primary-950/20">
+    <div className="p-6 space-y-6 bg-gray-50/50 dark:bg-zinc-900/20">
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-2">

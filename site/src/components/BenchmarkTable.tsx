@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import type { ModelResult, SortDirection } from '@/lib/types';
-import { CATEGORY_SHORT_NAMES } from '@/lib/constants';
+import { CATEGORY_SHORT_NAMES, PROVIDER_NAMES } from '@/lib/constants';
 import { rankModels, scoreToBg } from '@/lib/scoring';
 import { TypeBadge } from './TypeBadge';
 
@@ -58,9 +58,9 @@ export function BenchmarkTable({ models }: Props) {
   }
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-primary-900/50">
+    <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-zinc-800">
       <table className="w-full text-sm">
-        <thead className="bg-gray-50 dark:bg-primary-950/50 text-gray-500 dark:text-gray-400">
+        <thead className="bg-gray-50 dark:bg-zinc-900/50 text-gray-500 dark:text-gray-400">
           <tr>
             <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider w-8">#</th>
             <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider">Model</th>
@@ -73,14 +73,18 @@ export function BenchmarkTable({ models }: Props) {
                 key={name}
                 field={name}
                 label={CATEGORY_SHORT_NAMES[name] ?? name.slice(0, 4)}
-                className="hidden xl:table-cell"
+                className="hidden lg:table-cell"
               />
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-100 dark:divide-primary-900/30">
-          {sorted.map((model, i) => (
-            <tr key={model.id} className="hover:bg-gray-50 dark:hover:bg-primary-950/30 transition-colors">
+        <tbody className="divide-y divide-gray-100 dark:divide-zinc-800/50">
+          {sorted.map((model, i) => {
+            const dc = model.data_completeness;
+            const completePct = dc ? Math.round(((dc.complete + dc.partial) / dc.total) * 100) : 100;
+            const isIncomplete = completePct < 90;
+            return (
+            <tr key={model.id} className="hover:bg-gray-50 dark:hover:bg-zinc-900/30 transition-colors">
               <td className="px-3 py-2 text-gray-400 tabular-nums">{i + 1}</td>
               <td className="px-3 py-2 font-medium">
                 <Link
@@ -89,9 +93,17 @@ export function BenchmarkTable({ models }: Props) {
                 >
                   {model.display_name}
                 </Link>
+                {isIncomplete && (
+                  <span
+                    className="ml-1.5 text-xs text-amber-500 dark:text-amber-400"
+                    title={`${dc!.complete + dc!.partial}/${dc!.total} scenarios completed (${dc!.missing} missing)`}
+                  >
+                    {completePct}%
+                  </span>
+                )}
               </td>
-              <td className="px-3 py-2 text-gray-500 dark:text-gray-400 hidden lg:table-cell capitalize">
-                {model.provider}
+              <td className="px-3 py-2 text-gray-500 dark:text-gray-400 hidden lg:table-cell">
+                {PROVIDER_NAMES[model.provider] ?? model.provider}
               </td>
               <td className="px-3 py-2 hidden md:table-cell">
                 <TypeBadge type={model.type} />
@@ -99,10 +111,13 @@ export function BenchmarkTable({ models }: Props) {
               <ScoreCell score={model.aggregate} />
               <ScoreCell score={model.utility_score} />
               {model.categories.map((cat) => (
-                <ScoreCell key={cat.name} score={cat.score} />
+                <td key={cat.name} className="px-3 py-2 score-cell text-center hidden lg:table-cell" style={{ backgroundColor: scoreToBg(cat.score) }}>
+                  {cat.score.toFixed(1)}
+                </td>
               ))}
             </tr>
-          ))}
+            );
+          })}
         </tbody>
       </table>
     </div>

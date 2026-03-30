@@ -66,6 +66,14 @@ export const TYPE_COLORS: Record<string, string> = {
   hybrid: 'bg-purple-500/15 text-purple-600 dark:text-purple-400 border-purple-500/30',
 };
 
+export const PROVIDER_NAMES: Record<string, string> = {
+  openai: 'OpenAI',
+  anthropic: 'Anthropic',
+  google: 'Google',
+  xai: 'xAI',
+  openrouter: 'OpenRouter',
+};
+
 export const GITHUB_REPO = 'https://github.com/thoughtgate/benchmark';
 export const OATF_BASE_URL = 'https://oatf.dev';
 export const THOUGHTJACK_URL = 'https://thoughtjack.io';

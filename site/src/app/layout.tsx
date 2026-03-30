@@ -20,7 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="min-h-screen bg-white dark:bg-[#0f0d1a] text-gray-900 dark:text-gray-100">
+      <body className="min-h-screen bg-white dark:bg-[#09090b] text-gray-900 dark:text-zinc-100">
         <ThemeProvider>
           <Navbar />
           <main className="max-w-7xl mx-auto px-4 py-8">{children}</main>

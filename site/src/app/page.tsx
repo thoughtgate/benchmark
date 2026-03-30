@@ -1,6 +1,6 @@
 import { getLatestRun, getRunFindings } from '@/lib/data';
 import { BenchmarkTable } from '@/components/BenchmarkTable';
-import { RadarChartWrapper } from '@/components/RadarChartWrapper';
+import { OATF_BASE_URL, THOUGHTJACK_URL } from '@/lib/constants';
 
 export default function Home() {
   const run = getLatestRun();
@@ -10,51 +10,78 @@ export default function Home() {
     return (
       <div className="text-center py-20">
         <h1 className="text-3xl font-bold">ThoughtJack AI Agent Security Benchmark</h1>
-        <p className="mt-4 text-gray-500 dark:text-gray-400">No benchmark data available yet.</p>
+        <p className="mt-4 text-gray-500 dark:text-zinc-400">No benchmark data available yet.</p>
       </div>
     );
   }
 
+  const scenarioCount = run.models[0]?.scenarios.length ?? 57;
+  const categoryCount = run.models[0]?.categories.length ?? 7;
+
   return (
-    <div className="space-y-10">
+    <div className="space-y-12">
       {/* Hero */}
-      <div>
-        <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
+      <div className="pt-4 pb-2">
+        <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 dark:text-zinc-100">
           AI Agent Security Benchmark
         </h1>
-        <p className="mt-3 text-lg text-gray-600 dark:text-gray-400 max-w-3xl">
-          How resistant are frontier LLMs to adversarial attacks on MCP, A2A, and AG-UI protocols?
-          We test {run.models[0]?.scenarios.length ?? 57} scenarios against{' '}
-          {run.models.length} models.
+        <p className="mt-3 text-lg text-gray-600 dark:text-zinc-400 max-w-3xl leading-relaxed">
+          Measuring how frontier LLMs resist adversarial attacks
+          across MCP, A2A, and AG-UI agentic protocols.
         </p>
-        <p className="mt-2 text-sm text-gray-400 dark:text-gray-500">
-          Last updated {run.metadata.date} &middot; ThoughtJack v{run.metadata.thoughtjack_version}
+
+        {/* Stat boxes */}
+        <div className="mt-6 flex flex-wrap gap-6">
+          {[
+            { value: run.models.length, label: 'Models' },
+            { value: scenarioCount, label: 'Scenarios' },
+            { value: run.metadata.runs_per_scenario, label: 'Runs Each' },
+            { value: categoryCount, label: 'Categories' },
+          ].map((stat) => (
+            <div key={stat.label}>
+              <div className="text-2xl font-bold font-mono text-gray-900 dark:text-zinc-100">
+                {stat.value}
+              </div>
+              <div className="text-xs text-gray-500 dark:text-zinc-500 uppercase tracking-wider">
+                {stat.label}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <p className="mt-4 text-sm text-gray-400 dark:text-zinc-600">
+          Based on the{' '}
+          <a href={OATF_BASE_URL} target="_blank" rel="noopener noreferrer" className="text-primary-600 dark:text-primary-400 hover:underline">
+            OATF specification
+          </a>
+          . Built with{' '}
+          <a href={THOUGHTJACK_URL} target="_blank" rel="noopener noreferrer" className="text-primary-600 dark:text-primary-400 hover:underline">
+            ThoughtJack
+          </a>
+          . Last updated {run.metadata.date}.
         </p>
       </div>
 
       {/* Benchmark table */}
       <BenchmarkTable models={run.models} />
 
-      {/* Radar chart + findings */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      {/* Key Findings */}
+      {findings && (
         <div>
-          <h2 className="text-lg font-semibold mb-4">Category Comparison</h2>
-          <RadarChartWrapper models={run.models} />
-        </div>
-
-        {findings && (
-          <div>
-            <h2 className="text-lg font-semibold mb-4">Key Findings</h2>
-            <div className="rounded-lg border border-primary-500/20 bg-primary-500/5 p-6 space-y-4">
-              {findings.split('\n\n').filter(Boolean).map((finding, i) => (
-                <p key={i} className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                  {finding}
-                </p>
-              ))}
-            </div>
+          <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-zinc-100">Key Findings</h2>
+          <div className="rounded-lg border border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900/50 p-6 space-y-4">
+            {findings.split('\n\n').filter(Boolean).map((finding, i) => (
+              <p key={i} className="text-sm text-gray-700 dark:text-zinc-300 leading-relaxed">
+                {finding.split(/(\*\*[^*]+\*\*)/g).map((part, j) =>
+                  part.startsWith('**') && part.endsWith('**')
+                    ? <strong key={j} className="font-semibold text-gray-900 dark:text-zinc-100">{part.slice(2, -2)}</strong>
+                    : part
+                )}
+              </p>
+            ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

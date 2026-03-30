@@ -71,7 +71,7 @@ export function ScenarioTable({ scenarios, initialCategoryFilter, runDate, model
         <select
           value={categoryFilter}
           onChange={(e) => setCategoryFilter(e.target.value)}
-          className="text-sm rounded-md border border-gray-300 dark:border-primary-800 bg-white dark:bg-primary-950 px-2 py-1 text-gray-700 dark:text-gray-300"
+          className="text-sm rounded-md border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-2 py-1 text-gray-700 dark:text-gray-300"
         >
           <option value="">All categories</option>
           {categories.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -79,7 +79,7 @@ export function ScenarioTable({ scenarios, initialCategoryFilter, runDate, model
         <select
           value={tierFilter}
           onChange={(e) => setTierFilter(Number(e.target.value))}
-          className="text-sm rounded-md border border-gray-300 dark:border-primary-800 bg-white dark:bg-primary-950 px-2 py-1 text-gray-700 dark:text-gray-300"
+          className="text-sm rounded-md border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-2 py-1 text-gray-700 dark:text-gray-300"
         >
           <option value={0}>All tiers</option>
           <option value={2}>T2+ only</option>
@@ -88,9 +88,9 @@ export function ScenarioTable({ scenarios, initialCategoryFilter, runDate, model
         <span className="text-xs text-gray-400 self-center">{filtered.length} scenarios</span>
       </div>
 
-      <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-primary-900/50">
+      <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-zinc-800">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 dark:bg-primary-950/50 text-gray-500 dark:text-gray-400">
+          <thead className="bg-gray-50 dark:bg-zinc-900/50 text-gray-500 dark:text-gray-400">
             <tr>
               <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider">Scenario</th>
               <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider hidden md:table-cell">Category</th>
@@ -102,7 +102,7 @@ export function ScenarioTable({ scenarios, initialCategoryFilter, runDate, model
               <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider hidden md:table-cell">Type</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100 dark:divide-primary-900/30">
+          <tbody className="divide-y divide-gray-100 dark:divide-zinc-800/50">
             {filtered.map((s) => {
               const isExpanded = expandedId === s.id;
               return (
@@ -114,8 +114,8 @@ export function ScenarioTable({ scenarios, initialCategoryFilter, runDate, model
                       hasTraces ? 'cursor-pointer' : ''
                     } ${
                       isExpanded
-                        ? 'bg-gray-50 dark:bg-primary-950/30'
-                        : 'hover:bg-gray-50 dark:hover:bg-primary-950/30'
+                        ? 'bg-gray-50 dark:bg-zinc-900/30'
+                        : 'hover:bg-gray-50 dark:hover:bg-zinc-900/30'
                     }`}
                     onClick={hasTraces ? () => toggleExpand(s.id) : undefined}
                   >

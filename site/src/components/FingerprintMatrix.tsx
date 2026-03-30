@@ -52,7 +52,7 @@ export function FingerprintMatrix({ matrixData, models }: Props) {
         <select
           value={tierThreshold}
           onChange={(e) => setTierThreshold(Number(e.target.value))}
-          className="text-xs rounded-md border border-gray-300 dark:border-primary-800 bg-white dark:bg-primary-950 px-2 py-1 text-gray-700 dark:text-gray-300"
+          className="text-xs rounded-md border border-gray-300 dark:border-primary-800 bg-white dark:bg-zinc-900 px-2 py-1 text-gray-700 dark:text-gray-300"
         >
           <option value={0}>All tiers</option>
           <option value={2}>T2+ only</option>
@@ -65,7 +65,7 @@ export function FingerprintMatrix({ matrixData, models }: Props) {
         <table className="text-xs border-collapse">
           <thead>
             <tr>
-              <th className="px-2 py-2 text-left text-gray-400 font-medium sticky left-0 bg-white dark:bg-[#0f0d1a] z-10">
+              <th className="px-2 py-2 text-left text-gray-400 font-medium sticky left-0 bg-white dark:bg-[#09090b] z-10">
                 Surface
               </th>
               {techniques.map((t) => (
@@ -80,7 +80,7 @@ export function FingerprintMatrix({ matrixData, models }: Props) {
               <>
                 <tr key={surface}>
                   <td
-                    className="px-2 py-2 font-medium text-gray-600 dark:text-gray-300 whitespace-nowrap cursor-pointer hover:text-primary-600 dark:hover:text-primary-400 sticky left-0 bg-white dark:bg-[#0f0d1a] z-10"
+                    className="px-2 py-2 font-medium text-gray-600 dark:text-gray-300 whitespace-nowrap cursor-pointer hover:text-primary-600 dark:hover:text-primary-400 sticky left-0 bg-white dark:bg-[#09090b] z-10"
                     onClick={() => setExpandedSurface(expandedSurface === surface ? null : surface)}
                     title={SURFACE_LABELS[surface]}
                   >
@@ -124,7 +124,7 @@ export function FingerprintMatrix({ matrixData, models }: Props) {
                 {/* Expanded row showing individual scenarios */}
                 {expandedSurface === surface && (
                   <tr key={`${surface}-expanded`}>
-                    <td colSpan={techniques.length + 1} className="px-4 py-3 bg-gray-50 dark:bg-primary-950/30">
+                    <td colSpan={techniques.length + 1} className="px-4 py-3 bg-gray-50 dark:bg-zinc-900/30">
                       <div className="space-y-2">
                         {Object.entries(cells[surface] ?? {}).flatMap(([tech, cell]) =>
                           cell.scenarios.map((scenario) => (

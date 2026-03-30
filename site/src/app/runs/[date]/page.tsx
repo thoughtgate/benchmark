@@ -31,7 +31,7 @@ export default async function RunDetailPage({ params }: { params: Promise<{ date
       </div>
 
       {/* Metadata */}
-      <div className="rounded-lg border border-gray-200 dark:border-primary-900/50 p-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+      <div className="rounded-lg border border-gray-200 dark:border-zinc-800 p-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
         <div>
           <div className="text-xs text-gray-400 uppercase tracking-wider">Scenario Set</div>
           <div className="font-mono">{run.metadata.scenario_set_version}</div>
@@ -61,12 +61,18 @@ export default async function RunDetailPage({ params }: { params: Promise<{ date
 
       {/* Findings */}
       {findings && (
-        <div className="rounded-lg border border-primary-500/20 bg-primary-500/5 p-6">
+        <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-6">
           <h2 className="text-sm font-semibold text-primary-600 dark:text-primary-300 mb-3 uppercase tracking-wider">
             Key Findings
           </h2>
           {findings.split('\n\n').filter(Boolean).map((f, i) => (
-            <p key={i} className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed mb-2">{f}</p>
+            <p key={i} className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed mb-2">
+              {f.split(/(\*\*[^*]+\*\*)/g).map((part, j) =>
+                part.startsWith('**') && part.endsWith('**')
+                  ? <strong key={j}>{part.slice(2, -2)}</strong>
+                  : part
+              )}
+            </p>
           ))}
         </div>
       )}

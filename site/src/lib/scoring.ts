@@ -21,7 +21,7 @@ export function scoreToColor(score: number): string {
 /** Return a CSS background with transparency for score cells. */
 export function scoreToBg(score: number): string {
   const color = scoreToColor(score);
-  return color.replace('rgb(', 'rgba(').replace(')', ', 0.15)');
+  return color.replace('rgb(', 'rgba(').replace(')', ', 0.1)');
 }
 
 export function tierToColor(tier: number): string {

@@ -6,6 +6,7 @@ import { ScenarioTable } from '@/components/ScenarioTable';
 import { CategoryBarWrapper } from '@/components/CategoryBarWrapper';
 import { HistoryChartWrapper } from '@/components/HistoryChartWrapper';
 import { scoreToBg } from '@/lib/scoring';
+import { PROVIDER_NAMES } from '@/lib/constants';
 
 export function generateStaticParams() {
   return getAllModelIds().map((id) => ({ id }));
@@ -40,8 +41,13 @@ export default async function ModelPage({ params }: { params: Promise<{ id: stri
             <TypeBadge type={model.type} />
           </div>
           <p className="text-gray-500 dark:text-gray-400 text-sm">
-            {model.provider} &middot; Last tested {run.metadata.date}
+            {PROVIDER_NAMES[model.provider] ?? model.provider} &middot; Last tested {run.metadata.date}
           </p>
+          {model.data_completeness && model.data_completeness.missing > 0 && (
+            <p className="mt-1 text-xs text-amber-500 dark:text-amber-400">
+              Partial data: {model.data_completeness.complete + model.data_completeness.partial}/{model.data_completeness.total} scenarios completed ({model.data_completeness.missing} failed due to API errors)
+            </p>
+          )}
         </div>
         <div className="flex gap-4">
           <div className="text-center">
@@ -89,18 +95,18 @@ export default async function ModelPage({ params }: { params: Promise<{ id: stri
       {model.utility_scenarios.length > 0 && (
         <div>
           <h2 className="text-lg font-semibold mb-4">Utility Tasks</h2>
-          <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-primary-900/50">
+          <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-zinc-800">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 dark:bg-primary-950/50 text-gray-500 dark:text-gray-400">
+              <thead className="bg-gray-50 dark:bg-zinc-900/50 text-gray-500 dark:text-gray-400">
                 <tr>
                   <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider">Task</th>
                   <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider">Pass Rate</th>
                   <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider">Runs</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-primary-900/30">
+              <tbody className="divide-y divide-gray-100 dark:divide-zinc-800/50">
                 {model.utility_scenarios.map((u) => (
-                  <tr key={u.id} className="hover:bg-gray-50 dark:hover:bg-primary-950/30">
+                  <tr key={u.id} className="hover:bg-gray-50 dark:hover:bg-zinc-900/30">
                     <td className="px-3 py-2">
                       <span className="font-mono text-xs text-primary-600 dark:text-primary-400">{u.id}</span>
                       <span className="ml-2 text-gray-600 dark:text-gray-400 text-xs">{u.task}</span>
