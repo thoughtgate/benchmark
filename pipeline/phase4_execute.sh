@@ -71,7 +71,7 @@ run_one_job() {
 
   # shellcheck disable=SC2086
   "$TJ_BIN" run \
-    --config "$scenario_yaml" \
+    "$scenario_yaml" \
     --context \
     $_TJ_CONTEXT_ARGS \
     --context-api-key "$_TJ_API_KEY" \

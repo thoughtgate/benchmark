@@ -23,6 +23,14 @@ export interface ModelResult {
   utility_score: number;
   scenarios: ScenarioResult[];
   utility_scenarios: UtilityResult[];
+  data_completeness?: DataCompleteness;
+}
+
+export interface DataCompleteness {
+  complete: number;
+  partial: number;
+  missing: number;
+  total: number;
 }
 
 export interface CategoryScore {

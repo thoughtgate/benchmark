@@ -131,7 +131,7 @@ build_tj_args() {
   max_turns=$(get_config_value '.run.max_turns')
   context_timeout=$(get_config_value '.run.context_timeout')
 
-  echo "--config" "$scenario" \
+  echo "$scenario" \
     "--context" \
     $context_args \
     "--context-api-key" "$api_key" \

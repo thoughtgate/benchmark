@@ -57,7 +57,7 @@ attack:
       tier: ingested
       direction: request
       protocol: a2a
-      target: "message"
+      target: "arguments"
       description: "Model delegated translation task to A2A agent"
       pattern:
         regex: "(Hello world|translate|French)"

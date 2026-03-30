@@ -193,7 +193,7 @@ fi
 # ========================================
 if should_run_phase 4; then
   log_phase 4 "Execute benchmark"
-  source "$SCRIPT_DIR/phase4_execute.sh"
+  python3 "$SCRIPT_DIR/phase4_execute.py" "$RUN_DIR" "$REPO_ROOT"
 fi
 
 # ========================================

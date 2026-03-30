@@ -62,8 +62,8 @@ models:
     type: "hybrid"
     api_key_env: "GEMINI_API_KEY"
     context_args: >-
-      --context-provider openai --context-model gemini-3.1-pro
-      --context-base-url "https://generativelanguage.googleapis.com/v1beta/openai"
+      --context-provider openai --context-model gemini-3.1-pro-preview
+      --context-base-url https://generativelanguage.googleapis.com/v1beta/openai
 
   - id: "grok-4.20"
     display_name: "Grok 4.20"
@@ -72,7 +72,7 @@ models:
     api_key_env: "XAI_API_KEY"
     context_args: >-
       --context-provider openai --context-model grok-4.20-beta
-      --context-base-url "https://api.x.ai/v1"
+      --context-base-url https://api.x.ai/v1
 
   - id: "grok-4.20-reasoning"
     display_name: "Grok 4.20 Reasoning"
@@ -81,7 +81,7 @@ models:
     api_key_env: "XAI_API_KEY"
     context_args: >-
       --context-provider openai --context-model grok-4.20-beta
-      --context-base-url "https://api.x.ai/v1"
+      --context-base-url https://api.x.ai/v1
 
   # OpenRouter models use:
   #   provider: "openrouter"

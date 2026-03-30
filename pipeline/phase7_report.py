@@ -190,8 +190,8 @@ def generate_findings(scored, previous_scored=None):
             f"**{worst_scenario['id']}** ({worst_scenario['name']}) exploited {worst_exploit_count}/{len(models)} models at maximum tier."
         )
 
-    # Finding 2: Reasoning vs standard delta
-    reasoning = [m for m in models if m["type"] in ("reasoning", "hybrid")]
+    # Finding 2: Reasoning vs standard delta (exclude hybrid — doesn't belong in either group)
+    reasoning = [m for m in models if m["type"] == "reasoning"]
     standard = [m for m in models if m["type"] == "standard"]
     if reasoning and standard:
         avg_r = sum(m["aggregate"] for m in reasoning) / len(reasoning)
@@ -219,6 +219,11 @@ def generate_findings(scored, previous_scored=None):
         for m in models:
             prev = prev_models.get(m["id"])
             if prev:
+                # Skip comparison if previous run had insufficient data
+                prev_with_data = sum(1 for s in prev.get("scenarios", []) if s.get("runs"))
+                prev_total = len(prev.get("scenarios", []))
+                if prev_total > 0 and prev_with_data / prev_total < 0.5:
+                    continue
                 delta = m["aggregate"] - prev["aggregate"]
                 if abs(delta) > abs(biggest_delta):
                     biggest_delta = delta

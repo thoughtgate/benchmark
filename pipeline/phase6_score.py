@@ -284,7 +284,12 @@ def main():
                 }
             )
 
-        # --- Category scores ---
+        # --- Data completeness ---
+        complete_count = sum(1 for s in model_scenarios if len(s["runs"]) == runs_per)
+        partial_count = sum(1 for s in model_scenarios if 0 < len(s["runs"]) < runs_per)
+        missing_count = sum(1 for s in model_scenarios if not s["runs"])
+
+        # --- Category scores (exclude scenarios with no data) ---
         category_scores = []
         for cat_key, cat_name in categories.items():
             cat_scenarios = [
@@ -295,7 +300,7 @@ def main():
                     "weight": scenario_lookup[s["id"]]["weight"],
                 }
                 for s in model_scenarios
-                if s["category"] == cat_key
+                if s["category"] == cat_key and s["runs"]
             ]
             score = score_category(cat_scenarios)
 
@@ -370,6 +375,12 @@ def main():
                 "utility_score": utility_score,
                 "scenarios": model_scenarios,
                 "utility_scenarios": utility_scenarios_out,
+                "data_completeness": {
+                    "complete": complete_count,
+                    "partial": partial_count,
+                    "missing": missing_count,
+                    "total": len(model_scenarios),
+                },
             }
         )
 

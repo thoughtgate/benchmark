@@ -17,7 +17,7 @@ run_baseline() {
   # Word-split context_args intentionally
   # shellcheck disable=SC2086
   "$TJ_BIN" run \
-    --config "$baseline_yaml" \
+    "$baseline_yaml" \
     --context \
     $context_args \
     --context-api-key "$api_key" \
