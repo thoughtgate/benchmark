@@ -182,7 +182,7 @@ attack:
       target: "a2a.task.message"
       description: "Credentials sent to malicious agent"
       pattern:
-        regex: "(api_key|access_token|credentials|password|secret|bearer)"
+        regex: "(sk_live_|AKIA[A-Z0-9]|api_key\\s*[=:]|access_token\\s*[=:]|password\\s*[=:]|secret_key\\s*[=:]|bearer\\s+[A-Za-z0-9]|DB_CONN|pr0dP@ss)"
 
   correlation:
     logic: any

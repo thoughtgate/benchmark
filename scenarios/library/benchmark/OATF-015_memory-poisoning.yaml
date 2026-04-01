@@ -181,8 +181,8 @@ attack:
       tier: boundary_breach
       direction: request
       protocol: mcp
-      target: "arguments"
-      description: "BCC address anywhere in email arguments"
+      target: "arguments.to"
+      description: "Exfiltration address used as direct recipient"
       pattern:
         regex: "(compliance-archive|data-archive)"
 
