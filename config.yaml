@@ -5,7 +5,7 @@ thoughtjack:
   version_required: "0.5.0"
 
 run:
-  runs_per_scenario: 5
+  runs_per_scenario: 1
   max_session: "180s"
   max_turns: 15
   context_timeout: 90
@@ -22,7 +22,7 @@ rate_limits:
     inter_run_delay_ms: 200
     inter_model_delay_ms: 2000
   google:
-    max_parallel: 5
+    max_parallel: 2
     inter_run_delay_ms: 200
     inter_model_delay_ms: 2000
   xai:
@@ -35,35 +35,110 @@ rate_limits:
     inter_model_delay_ms: 2000
 
 models:
-  - id: "gpt-5.4"
-    display_name: "GPT-5.4"
-    provider: "openai"
-    type: "standard"
-    api_key_env: "OPENAI_API_KEY"
-    context_args: "--context-provider openai --context-model gpt-5.4"
+  # Anthropic
+  - id: "claude-opus-4-7"
+    display_name: "Claude Opus 4.7"
+    provider: "anthropic"
+    type: "hybrid"
+    api_key_env: "ANTHROPIC_API_KEY"
+    context_args: "--context-provider anthropic --context-model claude-opus-4-7"
 
-  - id: "o3"
-    display_name: "o3"
-    provider: "openai"
-    type: "reasoning"
-    api_key_env: "OPENAI_API_KEY"
-    context_args: "--context-provider openai --context-model o3"
+  - id: "claude-opus-4-6"
+    display_name: "Claude Opus 4.6"
+    provider: "anthropic"
+    type: "hybrid"
+    api_key_env: "ANTHROPIC_API_KEY"
+    context_args: "--context-provider anthropic --context-model claude-opus-4-6"
 
   - id: "claude-sonnet-4-6"
     display_name: "Claude Sonnet 4.6"
     provider: "anthropic"
     type: "hybrid"
-    api_key_env: "CLAUDE_API_KEY"
+    api_key_env: "ANTHROPIC_API_KEY"
     context_args: "--context-provider anthropic --context-model claude-sonnet-4-6"
 
+  - id: "claude-haiku-4-5"
+    display_name: "Claude Haiku 4.5"
+    provider: "anthropic"
+    type: "standard"
+    api_key_env: "ANTHROPIC_API_KEY"
+    context_args: "--context-provider anthropic --context-model claude-haiku-4-5-20251001"
+
+  # Google
   - id: "gemini-3.1-pro"
     display_name: "Gemini 3.1 Pro"
     provider: "google"
-    type: "hybrid"
-    api_key_env: "GEMINI_API_KEY"
+    type: "standard"
+    api_key_env: "GOOGLE_API_KEY"
     context_args: >-
       --context-provider openai --context-model gemini-3.1-pro-preview
-      --context-base-url https://generativelanguage.googleapis.com/v1beta/openai
+      --context-base-url "https://generativelanguage.googleapis.com/v1beta/openai/"
+
+  - id: "gemini-3-flash"
+    display_name: "Gemini 3 Flash"
+    provider: "google"
+    type: "standard"
+    api_key_env: "GOOGLE_API_KEY"
+    context_args: >-
+      --context-provider openai --context-model gemini-3-flash-preview
+      --context-base-url "https://generativelanguage.googleapis.com/v1beta/openai/"
+
+  - id: "gemini-3.1-flash-lite"
+    display_name: "Gemini 3.1 Flash Lite"
+    provider: "google"
+    type: "standard"
+    api_key_env: "GOOGLE_API_KEY"
+    context_args: >-
+      --context-provider openai --context-model gemini-3.1-flash-lite-preview
+      --context-base-url "https://generativelanguage.googleapis.com/v1beta/openai/"
+
+  # OpenAI
+  - id: "gpt-5.5-pro"
+    display_name: "GPT-5.5 Pro"
+    provider: "openai"
+    type: "reasoning"
+    api_key_env: "OPENAI_API_KEY"
+    context_args: "--context-provider openai --context-model gpt-5.5-pro"
+
+  - id: "gpt-5.5"
+    display_name: "GPT-5.5"
+    provider: "openai"
+    type: "standard"
+    api_key_env: "OPENAI_API_KEY"
+    context_args: "--context-provider openai --context-model gpt-5.5"
+
+  - id: "gpt-5.4"
+    display_name: "GPT-5.4"
+    provider: "openai"
+    type: "standard"
+    api_key_env: "OPENAI_API_KEY"
+    context_args: "--context-provider openai --context-model gpt-5.4-2026-03-05"
+
+  - id: "gpt-5.4-mini"
+    display_name: "GPT-5.4 Mini"
+    provider: "openai"
+    type: "standard"
+    api_key_env: "OPENAI_API_KEY"
+    context_args: "--context-provider openai --context-model gpt-5.4-mini-2026-03-17"
+
+  - id: "gpt-oss-120b"
+    display_name: "GPT-OSS 120B"
+    provider: "openrouter"
+    type: "standard"
+    api_key_env: "OPENROUTER_API_KEY"
+    context_args: >-
+      --context-provider openai --context-model openai/gpt-oss-120b
+      --context-base-url "https://openrouter.ai/api/v1"
+
+  # xAI
+  - id: "grok-4.3"
+    display_name: "Grok 4.3"
+    provider: "xai"
+    type: "reasoning"
+    api_key_env: "XAI_API_KEY"
+    context_args: >-
+      --context-provider openai --context-model grok-4.3
+      --context-base-url https://api.x.ai/v1
 
   - id: "grok-4.20"
     display_name: "Grok 4.20"
@@ -71,21 +146,96 @@ models:
     type: "standard"
     api_key_env: "XAI_API_KEY"
     context_args: >-
-      --context-provider openai --context-model grok-4.20-beta
+      --context-provider openai --context-model grok-4.20-0309-non-reasoning
       --context-base-url https://api.x.ai/v1
 
-  - id: "grok-4.20-reasoning"
-    display_name: "Grok 4.20 Reasoning"
-    provider: "xai"
+  # OpenRouter
+  - id: "deepseek-v4-pro"
+    display_name: "DeepSeek V4 Pro"
+    provider: "openrouter"
     type: "reasoning"
-    api_key_env: "XAI_API_KEY"
+    api_key_env: "OPENROUTER_API_KEY"
     context_args: >-
-      --context-provider openai --context-model grok-4.20-beta
-      --context-base-url https://api.x.ai/v1
+      --context-provider openai --context-model deepseek/deepseek-v4-pro
+      --context-base-url "https://openrouter.ai/api/v1"
 
-  # OpenRouter models use:
-  #   provider: "openrouter"
-  #   api_key_env: "OPENROUTER_API_KEY"
-  #   context_args: >-
-  #     --context-provider openai --context-model <openrouter-model-id>
-  #     --context-base-url "https://openrouter.ai/api/v1"
+  - id: "deepseek-v4-flash"
+    display_name: "DeepSeek V4 Flash"
+    provider: "openrouter"
+    type: "standard"
+    api_key_env: "OPENROUTER_API_KEY"
+    context_args: >-
+      --context-provider openai --context-model deepseek/deepseek-v4-flash
+      --context-base-url "https://openrouter.ai/api/v1"
+
+  - id: "kimi-k2.6"
+    display_name: "Kimi K2.6"
+    provider: "openrouter"
+    type: "reasoning"
+    api_key_env: "OPENROUTER_API_KEY"
+    context_args: >-
+      --context-provider openai --context-model moonshotai/kimi-k2.6
+      --context-base-url "https://openrouter.ai/api/v1"
+
+  - id: "glm-5.1"
+    display_name: "GLM-5.1"
+    provider: "openrouter"
+    type: "standard"
+    api_key_env: "OPENROUTER_API_KEY"
+    context_args: >-
+      --context-provider openai --context-model z-ai/glm-5.1
+      --context-base-url "https://openrouter.ai/api/v1"
+
+  - id: "mistral-medium-3.5"
+    display_name: "Mistral Medium 3.5"
+    provider: "openrouter"
+    type: "standard"
+    api_key_env: "OPENROUTER_API_KEY"
+    context_args: >-
+      --context-provider openai --context-model mistralai/mistral-medium-3.5
+      --context-base-url "https://openrouter.ai/api/v1"
+
+  - id: "llama-4-maverick"
+    display_name: "Llama 4 Maverick"
+    provider: "openrouter"
+    type: "standard"
+    api_key_env: "OPENROUTER_API_KEY"
+    context_args: >-
+      --context-provider openai --context-model meta-llama/llama-4-maverick
+      --context-base-url "https://openrouter.ai/api/v1"
+
+  - id: "mistral-large-3"
+    display_name: "Mistral Large 3"
+    provider: "openrouter"
+    type: "standard"
+    api_key_env: "OPENROUTER_API_KEY"
+    context_args: >-
+      --context-provider openai --context-model mistralai/mistral-large-2512
+      --context-base-url "https://openrouter.ai/api/v1"
+
+  - id: "mistral-small-4"
+    display_name: "Mistral Small 4"
+    provider: "openrouter"
+    type: "standard"
+    api_key_env: "OPENROUTER_API_KEY"
+    context_args: >-
+      --context-provider openai --context-model mistralai/mistral-small-2603
+      --context-base-url "https://openrouter.ai/api/v1"
+
+  - id: "qwen3.6-plus"
+    display_name: "Qwen3.6 Plus"
+    provider: "openrouter"
+    type: "standard"
+    api_key_env: "OPENROUTER_API_KEY"
+    context_args: >-
+      --context-provider openai --context-model qwen/qwen3.6-plus-preview
+      --context-base-url "https://openrouter.ai/api/v1"
+
+  - id: "minimax-m2.7"
+    display_name: "MiniMax M2.7"
+    provider: "openrouter"
+    type: "standard"
+    api_key_env: "OPENROUTER_API_KEY"
+    context_args: >-
+      --context-provider openai --context-model minimax/minimax-m2.7
+      --context-base-url "https://openrouter.ai/api/v1"
