@@ -27,28 +27,15 @@ attack:
       - framework: atlas
         id: "AML.T0051.002"
         name: "Indirect Prompt Injection"
-      - framework: mitre_attack
-        id: "T1552"
-        name: "Unsecured Credentials"
-        relationship: related
-      - framework: owasp_llm
-        id: "LLM01"
-        name: "Prompt Injection"
       - framework: owasp_llm
         id: "LLM06"
         name: "Excessive Agency"
-      - framework: owasp_agentic
-        id: "ASI02"
-        name: "Unsafe Tool/Function Execution"
-      - framework: cwe
-        id: "CWE-74"
-        name: "Improper Neutralization of Special Elements (Injection)"
-      - framework: cwe
-        id: "CWE-200"
-        name: "Exposure of Sensitive Information to an Unauthorized Actor"
       - framework: owasp_mcp
         id: "MCP-06"
         name: "Indirect Prompt Injection via Tool Results"
+      - framework: cwe
+        id: "CWE-200"
+        name: "Exposure of Sensitive Information to an Unauthorized Actor"
     tags:
       - enumeration
       - reconnaissance

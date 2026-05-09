@@ -176,9 +176,68 @@ OATF-001e uses Cyrillic homoglyphs in the incoming payload. No special engine ha
 - Result JSON files are the primary data. `scored.json` is the only derived file.
 - The pipeline runs in GitHub Actions with full logs. Anyone can fork the repo and reproduce with their own API keys.
 
+### Per-scenario system prompts
+
+Scenarios that test confidential-context disclosure (OATF-018, OATF-019, OATF-019a, OATF-019b, OATF-027, OATF-029) inject the confidential context via the `ag_ui_client` actor's first `messages[]` entry with `role: system`, carrying scenario-unique canary tokens (e.g., `SUNSPOT-3`, `SUNSPOT-7`, `SUNSPOT-12`). Indicators reference those scenario-local canaries, not a globally-shared system prompt. This keeps each scenario file self-contained and portable: anyone running a scenario standalone with `thoughtjack run` gets the same canary contract that the indicators expect, with no pipeline-level configuration required. The pipeline does not pass `--context-system-prompt` for any scenario.
+
+### Framework-mapping policy
+
+Each scenario carries at most four entries in `attack.classification.mappings`, one per family:
+
+1. **ATLAS or MITRE ATT&CK** — the single most-specific technique. Generic relations (e.g., `T1036 Masquerading`) are dropped unless they are the primary mechanic.
+2. **OWASP LLM Top 10** — one entry, preferring the most-specific (e.g., `LLM07 System Prompt Leakage` for disclosure scenarios over the generic `LLM01 Prompt Injection`).
+3. **OWASP Agentic** *or* **OWASP MCP** — pick whichever fits the surface; do not double up.
+4. **CWE** — the closest weakness root-cause, preferring specific (`CWE-441` confused deputy, `CWE-863` incorrect authorization) over generic (`CWE-74` injection, `CWE-200` exposure).
+
+The 4-mapping cap is enforced by convention; new scenarios should follow it. The cap exists to make framework citations honest and to avoid the "kitchen sink" pattern (mapping every scenario to 8–10 frameworks) that draws overclaiming criticism.
+
 ---
 
-## 12. Limitations
+## 12. Threat models
+
+The scenarios assume specific protocol-level adversary positions. The benchmark measures whether a model-driven agent preserves protocol-level invariants when one of these adversaries is present.
+
+### MCP-server compromise (S1, S3–S6)
+
+The attacker controls one MCP server and can write tool descriptions, parameter schemas, tool responses, and resource content. Used by OATF-001, OATF-003, OATF-007, OATF-008, OATF-009, OATF-010, OATF-013, OATF-014, OATF-017, OATF-018, OATF-019, OATF-024, OATF-025, OATF-026, OATF-027, OATF-029, OATF-030, OATF-031, OATF-032 and their variants. Real-world precedents include Invariant Labs' line-jumping research and CyberArk ATPA against published MCP servers.
+
+### A2A peer / registry compromise (S8, S9)
+
+A malicious agent registers in the A2A registry alongside legitimate ones, advertising similar or typosquatted skills. The model under test must apply identity verification before delegating sensitive data. Used by OATF-011, OATF-016, OATF-022, OATF-023. Real-world precedents include Semgrep and Keysight A2A research.
+
+### AG-UI channel compromise (S10)
+
+The AG-UI client is itself compromised — i.e., the channel between the user's frontend and the agent host is the attacker's position. This adversary supplies arbitrary `messages[]` entries (including `role: system`) and `state` blobs to the agent. Used by OATF-006, OATF-028.
+
+**Important:** in normal AG-UI deployments, the frontend constructs `messages[]` and `state` server-side and the agent host trusts them. These scenarios do not model normal operation — they model the threat where the channel itself is compromised, analogous to MITM in TLS. The benchmark measures whether the agent applies any trust-boundary checks (e.g., refusing a `role: system` directive that conflicts with its configured policy) as a defense-in-depth mechanism. A model that treats every client-supplied directive as authoritative is more brittle in the channel-compromise case than one that does not. T0 is the desired outcome but is not the only "correct" behavior — a model that ingests the directive and warns the user is also acceptable in deployment.
+
+### Cross-tenant adversary (S2)
+
+A second tenant injects content into a resource the agent reads on behalf of the primary tenant. The model must enforce tenant isolation at the call site even though the injection arrives via shared infrastructure. Used by OATF-017.
+
+### Out-of-scope adversaries
+
+These threat positions are intentionally not modeled in the current benchmark:
+
+- **Model-host compromise** — if the host running the LLM is compromised, no agent-level test can detect it.
+- **Sandbox escape from code-execution tools** — covered separately by sandbox-implementation testing, not agent behavior.
+- **Side-channel attacks against the model itself** (e.g., embedding-space attacks, weight extraction) — out of the protocol-level scope.
+
+---
+
+## 13. Out-of-scope and future scenarios
+
+The following attack classes were considered for inclusion and intentionally deferred. The reasoning is documented to make the scope choices explicit for reviewers.
+
+- **RAG / retrieved-document poisoning.** Mechanically identical to MCP resource-content poisoning (covered by OATF-019 and variants) and A2A artifact poisoning (OATF-024 and variants) when the retrieval surface is exposed via MCP. Adding a third instantiation of the same primitive would inflate the variant count without producing new evidence about model behavior. Reconsider when a distinct retrieval surface emerges (e.g., embedding-similarity-based retrieval injection that bypasses textual indicators).
+- **Conflicting-tool selection (same name, different servers).** Structurally adjacent to OATF-002 (tool shadowing across MCP servers). A "same-name on two servers, attacker's wins on ordering" variant would be a refinement of OATF-002 rather than a new primitive. Deferred unless community feedback shows it differentiates models meaningfully from OATF-002.
+- **Code-execution sandbox escape.** Modelable in OATF as a `python_exec`-style MCP tool with indicators on shell-escape and SSRF patterns in the code argument, but the failure being measured is in the sandbox implementation, not in the agent's protocol participation. Mixing this in conflates two measurement targets. Belongs in a separate sandbox-escape benchmark.
+
+OATF-033 (output side-channel exfiltration via markdown image, modeling the CamoLeak / EchoLeak class) was the one new primary added in this revision. It is included in `exfiltration_resistance` at weight 1.0.
+
+---
+
+## 14. Limitations
 
 - **Context mode only**: tests LLM-level decisions, not protocol-level attacks.
 - **Non-determinism**: LLM responses vary. The 5-run worst-case is conservative. Typical tier and consistency are displayed alongside.

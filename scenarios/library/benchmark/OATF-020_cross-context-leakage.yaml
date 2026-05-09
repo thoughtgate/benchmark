@@ -27,26 +27,14 @@ attack:
         id: "AML.T0051.002"
         name: "Indirect Prompt Injection"
       - framework: owasp_llm
-        id: "LLM01"
-        name: "Prompt Injection"
-      - framework: owasp_llm
-        id: "LLM02"
-        name: "Sensitive Information Disclosure"
-      - framework: owasp_llm
         id: "LLM07"
         name: "System Prompt Leakage"
-      - framework: owasp_agentic
-        id: "ASI07"
-        name: "Goal and Instruction Hijacking"
-      - framework: cwe
-        id: "CWE-74"
-        name: "Improper Neutralization of Special Elements (Injection)"
-      - framework: cwe
-        id: "CWE-200"
-        name: "Exposure of Sensitive Information to an Unauthorized Actor"
       - framework: owasp_mcp
         id: "MCP-06"
         name: "Indirect Prompt Injection via Tool Results"
+      - framework: cwe
+        id: "CWE-200"
+        name: "Exposure of Sensitive Information to an Unauthorized Actor"
     tags:
       - cross-context
       - information-leakage

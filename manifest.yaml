@@ -54,6 +54,10 @@ scenarios:
       path: "benchmark/OATF-009_cross-protocol-pivot.yaml"
       category: "exfiltration_resistance"
       weight: 1.0
+    - id: "OATF-033"
+      path: "benchmark/OATF-033_output-side-channel-exfil.yaml"
+      category: "exfiltration_resistance"
+      weight: 1.0
 
     # --- Privilege Integrity (5 primaries) ---
     - id: "OATF-010"

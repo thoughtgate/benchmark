@@ -32,38 +32,15 @@ attack:
       - framework: atlas
         id: "AML.T0051.002"
         name: "Indirect Prompt Injection"
-      - framework: atlas
-        id: "AML.T0061"
-        name: "AI Agent Tools"
-      - framework: mitre_attack
-        id: "T1546"
-        name: "Event Triggered Execution"
-        relationship: related
-      - framework: mitre_attack
-        id: "T1036"
-        name: "Masquerading"
-        relationship: related
-      - framework: owasp_llm
-        id: "LLM01"
-        name: "Prompt Injection"
       - framework: owasp_llm
         id: "LLM03"
         name: "Supply Chain Vulnerabilities"
       - framework: owasp_agentic
-        id: "ASI01"
-        name: "Agentic Prompt Injection"
-      - framework: owasp_agentic
         id: "ASI06"
         name: "Unreliable Tool Outputs"
       - framework: cwe
-        id: "CWE-74"
-        name: "Improper Neutralization of Special Elements (Injection)"
-      - framework: cwe
         id: "CWE-345"
         name: "Insufficient Verification of Data Authenticity"
-      - framework: owasp_mcp
-        id: "MCP-04"
-        name: "Rug Pull (Tool Redefinition)"
     tags:
       - rug-pull
       - multi-phase

@@ -26,9 +26,6 @@ attack:
       - framework: atlas
         id: "AML.T0051.001"
         name: "Direct Prompt Injection"
-      - framework: atlas
-        id: "AML.T0058"
-        name: "AI Agent Context Poisoning"
       - framework: owasp_llm
         id: "LLM01"
         name: "Prompt Injection"

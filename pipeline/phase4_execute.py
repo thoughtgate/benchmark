@@ -71,6 +71,9 @@ class RunTask:
     scenario_id: str
     run_num: int
     results_dir: str  # "results" or "utility-results"
+    context_args: str = ""
+    api_key: str = ""
+    temperature: float = 0.0
 
 
 @dataclass
@@ -103,7 +106,7 @@ async def run_one(cfg: RunConfig, task: RunTask, semaphore: asyncio.Semaphore) -
 
     # Parse context_args — these are space-separated flags from config.yaml
     # that need to be passed as individual arguments
-    model_cfg_args = shlex.split(task.context_args) if hasattr(task, "context_args") else []
+    model_cfg_args = shlex.split(task.context_args) if task.context_args else []
 
     cmd = [
         cfg.tj_bin, "run",
@@ -314,11 +317,10 @@ async def execute_model(
                 scenario_id=scenario_id,
                 run_num=run_num,
                 results_dir="results",
+                context_args=model.context_args,
+                api_key=model.api_key,
+                temperature=model.temperature,
             )
-            # Attach model-specific args
-            t.context_args = model.context_args
-            t.api_key = model.api_key
-            t.temperature = model.temperature
             tasks.append(t)
 
     for scenario_id in utility_ids:
@@ -333,10 +335,10 @@ async def execute_model(
                 scenario_id=scenario_id,
                 run_num=run_num,
                 results_dir="utility-results",
+                context_args=model.context_args,
+                api_key=model.api_key,
+                temperature=model.temperature,
             )
-            t.context_args = model.context_args
-            t.api_key = model.api_key
-            t.temperature = model.temperature
             tasks.append(t)
 
     # Filter to incomplete tasks
@@ -495,24 +497,33 @@ async def async_main(run_dir: Path, repo_root: Path):
     log(f"Expected total runs: {total_runs} ({len(models)} models \u00d7 {run_cfg.runs_per} runs)")
 
     start_time = time.monotonic()
-    last_provider = ""
 
+    # Group models by provider for concurrent cross-provider execution
+    from collections import defaultdict
+    by_provider: dict[str, list[ModelConfig]] = defaultdict(list)
     for model in models:
-        # Inter-model delay (same provider)
-        rate_limits = config.get("rate_limits", {}).get(model.provider, {})
+        by_provider[model.provider].append(model)
+
+    providers = sorted(by_provider.keys())
+    log(f"Providers: {', '.join(f'{p} ({len(by_provider[p])} models)' for p in providers)}")
+
+    async def run_provider(provider: str, provider_models: list[ModelConfig]):
+        """Run all models for a single provider sequentially (rate-limited)."""
+        rate_limits = config.get("rate_limits", {}).get(provider, {})
         inter_model_delay_ms = rate_limits.get("inter_model_delay_ms", 2000)
-
-        if model.provider == last_provider:
-            await asyncio.sleep(inter_model_delay_ms / 1000)
-        last_provider = model.provider
-
         max_parallel = rate_limits.get("max_parallel", 5)
-        log(f"Starting model: {model.id} ({model.provider}, {max_parallel}x parallel)")
 
-        await execute_model(run_cfg, model, run_dir, attack_ids, utility_ids, rate_limits, counter)
+        for i, model in enumerate(provider_models):
+            if i > 0:
+                await asyncio.sleep(inter_model_delay_ms / 1000)
 
-        write_progress(run_dir, counter, start_time)
-        log(f"Completed model: {model.id}")
+            log(f"Starting model: {model.id} ({provider}, {max_parallel}x parallel)")
+            await execute_model(run_cfg, model, run_dir, attack_ids, utility_ids, rate_limits, counter)
+            write_progress(run_dir, counter, start_time)
+            log(f"Completed model: {model.id}")
+
+    # Run all providers concurrently
+    await asyncio.gather(*(run_provider(p, by_provider[p]) for p in providers))
 
     write_progress(run_dir, counter, start_time)
     log(
