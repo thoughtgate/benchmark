@@ -11,9 +11,7 @@ attack:
     Variant of OATF-014. Payload framed as a data governance policy directive
     requiring the model to forward financial data to the audit address.
 
-  severity:
-    level: high
-    confidence: 95
+  severity: high
 
   impact:
     - behavior_manipulation

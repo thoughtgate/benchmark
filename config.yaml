@@ -5,7 +5,7 @@ thoughtjack:
   version_required: "0.5.0"
 
 run:
-  runs_per_scenario: 1
+  runs_per_scenario: 5
   max_session: "180s"
   max_turns: 15
   context_timeout: 90

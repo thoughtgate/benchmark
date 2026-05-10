@@ -12,9 +12,7 @@ attack:
     HTML comments. Tests whether explicit authority framing is more effective
     than HTML comments at redirecting the model's goal.
 
-  severity:
-    level: high
-    confidence: 95
+  severity: high
 
   impact:
     - behavior_manipulation

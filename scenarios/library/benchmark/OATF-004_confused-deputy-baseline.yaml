@@ -13,9 +13,7 @@ attack:
     HTML comments are the weakest evasion technique; most models should ignore
     them in tool response content.
 
-  severity:
-    level: high
-    confidence: 60
+  severity: high
 
   impact:
     - unauthorized_actions

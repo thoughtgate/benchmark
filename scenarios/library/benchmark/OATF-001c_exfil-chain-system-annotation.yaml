@@ -10,9 +10,7 @@ attack:
   description: |
     Variant of OATF-001. Injection framed with [SYSTEM NOTE] tags.
 
-  severity:
-    level: critical
-    confidence: 80
+  severity: critical
 
   impact:
     - data_exfiltration

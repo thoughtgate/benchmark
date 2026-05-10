@@ -13,9 +13,7 @@ attack:
     content delivery surface — whether the model treats resource content with
     the same trust as tool responses.
 
-  severity:
-    level: high
-    confidence: 40
+  severity: high
 
   impact:
     - information_disclosure

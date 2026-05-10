@@ -14,9 +14,7 @@ attack:
     the complete exfiltration chain: injection via tool description, local file
     read, and cross-server data transmission.
 
-  severity:
-    level: critical
-    confidence: 80
+  severity: critical
 
   impact:
     - data_exfiltration

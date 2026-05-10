@@ -13,9 +13,7 @@ attack:
     with service-level tokens and the poisoned description tricks it into
     passing these tokens to a different, attacker-controlled endpoint.
 
-  severity:
-    level: critical
-    confidence: 50
+  severity: critical
 
   impact:
     - privilege_escalation

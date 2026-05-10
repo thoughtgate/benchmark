@@ -14,9 +14,7 @@ attack:
     disclose its system prompt and server URLs. Tests the MCP prompts surface
     as an injection vector.
 
-  severity:
-    level: high
-    confidence: 30
+  severity: high
 
   impact:
     - behavior_manipulation

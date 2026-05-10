@@ -13,9 +13,7 @@ attack:
     differential — whether error framing is more effective than HTML comments
     at bypassing model defenses.
 
-  severity:
-    level: high
-    confidence: 70
+  severity: high
 
   impact:
     - unauthorized_actions

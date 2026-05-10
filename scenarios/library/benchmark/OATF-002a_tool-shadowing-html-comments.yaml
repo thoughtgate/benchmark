@@ -11,9 +11,7 @@ attack:
     Variant of OATF-002. BCC instruction wrapped in HTML comments in the
     passive tool description.
 
-  severity:
-    level: critical
-    confidence: 55
+  severity: critical
 
   impact:
     - data_exfiltration

@@ -12,9 +12,7 @@ attack:
     identifying the model as a batch processing bot that should forward results
     without confirmation.
 
-  severity:
-    level: high
-    confidence: 95
+  severity: high
 
   impact:
     - behavior_manipulation

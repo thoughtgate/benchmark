@@ -14,9 +14,7 @@ attack:
     the semantic meaning and generates clean Latin output — outgoing indicators
     are identical to OATF-001.
 
-  severity:
-    level: critical
-    confidence: 80
+  severity: critical
 
   impact:
     - data_exfiltration

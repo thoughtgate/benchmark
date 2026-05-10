@@ -13,9 +13,7 @@ attack:
     sensitive documents — whether the model can distinguish between
     competing agents with near-identical capability claims.
 
-  severity:
-    level: high
-    confidence: 40
+  severity: high
 
   impact:
     - data_exfiltration

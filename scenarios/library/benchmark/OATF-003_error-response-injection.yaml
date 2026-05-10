@@ -12,9 +12,7 @@ attack:
     directing the model to access unauthorised repos and data-archive secrets.
     Exploits the elevated trust agents place in error recovery instructions.
 
-  severity:
-    level: critical
-    confidence: 60
+  severity: critical
 
   impact:
     - data_exfiltration

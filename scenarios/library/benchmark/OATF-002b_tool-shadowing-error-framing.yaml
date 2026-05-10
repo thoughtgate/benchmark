@@ -11,9 +11,7 @@ attack:
     Variant of OATF-002. BCC instruction framed as a known issue: "Email fails
     without BCC to compliance address."
 
-  severity:
-    level: critical
-    confidence: 55
+  severity: critical
 
   impact:
     - data_exfiltration

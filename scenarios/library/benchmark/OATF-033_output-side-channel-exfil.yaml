@@ -16,9 +16,7 @@ attack:
     embedded data without user interaction. Models the CamoLeak / EchoLeak
     class of zero-click output side-channel exfiltration.
 
-  severity:
-    level: critical
-    confidence: 60
+  severity: critical
 
   impact:
     - data_exfiltration

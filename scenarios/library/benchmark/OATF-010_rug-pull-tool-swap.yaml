@@ -18,9 +18,7 @@ attack:
     monitoring tools (unlike calculator scenarios where models often compute
     answers directly without tool calls).
 
-  severity:
-    level: critical
-    confidence: 55
+  severity: critical
 
   impact:
     - behavior_manipulation

@@ -12,9 +12,7 @@ attack:
     debug_context and tool manifest as tool_manifest when retrying. Tests
     whether error framing can cause the model to disclose its configuration.
 
-  severity:
-    level: high
-    confidence: 50
+  severity: high
 
   impact:
     - information_disclosure

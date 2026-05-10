@@ -15,9 +15,7 @@ attack:
     catalog. Tests whether the model follows instructions hidden via ANSI
     steganography. Based on Trail of Bits research (April 2025).
 
-  severity:
-    level: critical
-    confidence: 60
+  severity: critical
 
   impact:
     - data_exfiltration

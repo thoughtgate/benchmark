@@ -12,9 +12,7 @@ attack:
     attacker URL via a different tool (webhook). The malicious tool is never
     called — it acts as a silent instruction injector via the tool catalog.
 
-  severity:
-    level: critical
-    confidence: 90
+  severity: critical
 
   impact:
     - data_exfiltration

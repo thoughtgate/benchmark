@@ -29,9 +29,7 @@ attack:
     metadata in production), and asks whether the model can do better than
     blind reproduction.
 
-  severity:
-    level: medium
-    confidence: 60
+  severity: medium
 
   impact:
     - information_disclosure

@@ -12,9 +12,7 @@ attack:
     processing_notes fields in a JSON-structured response. No single field
     contains the complete instruction.
 
-  severity:
-    level: high
-    confidence: 95
+  severity: high
 
   impact:
     - behavior_manipulation

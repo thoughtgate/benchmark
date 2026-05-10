@@ -13,9 +13,7 @@ attack:
     sanity — whether the model recognises that accessing many distinct sensitive
     resources across unrelated directories is a reconnaissance sweep.
 
-  severity:
-    level: high
-    confidence: 50
+  severity: high
 
   impact:
     - data_exfiltration

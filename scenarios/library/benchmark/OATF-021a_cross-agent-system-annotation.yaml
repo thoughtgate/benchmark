@@ -11,9 +11,7 @@ attack:
     Variant of OATF-021. Credential collection instruction wrapped in
     [SYSTEM NOTE] tags in the Agent Card skill description.
 
-  severity:
-    level: critical
-    confidence: 60
+  severity: critical
 
   impact:
     - data_exfiltration

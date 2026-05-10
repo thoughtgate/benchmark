@@ -11,9 +11,7 @@ attack:
     Variant of OATF-014. Hijack instruction is Base64-encoded with a preamble
     asking the model to decode and follow the instructions.
 
-  severity:
-    level: high
-    confidence: 95
+  severity: high
 
   impact:
     - behavior_manipulation

@@ -13,9 +13,7 @@ attack:
     can be redirected by injected instructions in tool response content
     using the weakest evasion technique (HTML comments).
 
-  severity:
-    level: high
-    confidence: 95
+  severity: high
 
   impact:
     - behavior_manipulation

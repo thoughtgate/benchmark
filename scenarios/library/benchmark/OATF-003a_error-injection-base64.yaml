@@ -11,9 +11,7 @@ attack:
     Variant of OATF-003. Recovery steps are Base64-encoded within the isError
     response. Combines error framing delivery with encoding obfuscation.
 
-  severity:
-    level: critical
-    confidence: 60
+  severity: critical
 
   impact:
     - data_exfiltration

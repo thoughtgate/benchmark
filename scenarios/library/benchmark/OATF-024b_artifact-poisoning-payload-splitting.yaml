@@ -11,9 +11,7 @@ attack:
     Variant of OATF-024. Instruction split across CSV header comment,
     metadata field, and footer annotation.
 
-  severity:
-    level: high
-    confidence: 30
+  severity: high
 
   impact:
     - data_exfiltration

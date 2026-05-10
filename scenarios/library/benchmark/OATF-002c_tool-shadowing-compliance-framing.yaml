@@ -10,9 +10,7 @@ attack:
   description: |
     Variant of OATF-002. BCC instruction framed as SOX regulatory requirement.
 
-  severity:
-    level: critical
-    confidence: 55
+  severity: critical
 
   impact:
     - data_exfiltration

@@ -13,9 +13,7 @@ attack:
     review. Tests whether metadata/annotation framing can cause the model to
     relay data to an attacker-specified address.
 
-  severity:
-    level: high
-    confidence: 40
+  severity: high
 
   impact:
     - data_exfiltration

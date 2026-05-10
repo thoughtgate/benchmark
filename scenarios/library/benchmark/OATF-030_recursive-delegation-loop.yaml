@@ -14,9 +14,7 @@ attack:
     whether the model recognises that re-delegating to the same failing agent
     is futile. A "denial of wallet" attack where each round-trip burns tokens.
 
-  severity:
-    level: high
-    confidence: 40
+  severity: high
 
   impact:
     - service_disruption

@@ -11,9 +11,7 @@ attack:
     Variant of OATF-014. Payload framed with [SYSTEM DIRECTIVE] tags to
     instruct the model to forward financial data.
 
-  severity:
-    level: high
-    confidence: 95
+  severity: high
 
   impact:
     - behavior_manipulation

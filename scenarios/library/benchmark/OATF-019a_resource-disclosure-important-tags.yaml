@@ -11,9 +11,7 @@ attack:
     Variant of OATF-019. Disclosure instruction wrapped in <IMPORTANT> tags
     in resource content.
 
-  severity:
-    level: high
-    confidence: 40
+  severity: high
 
   impact:
     - information_disclosure

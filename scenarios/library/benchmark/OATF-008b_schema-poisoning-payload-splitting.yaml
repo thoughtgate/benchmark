@@ -11,9 +11,7 @@ attack:
     Variant of OATF-008. Instruction split across parameter name, description,
     and default value — no single field contains the complete instruction.
 
-  severity:
-    level: critical
-    confidence: 50
+  severity: critical
 
   impact:
     - data_exfiltration

@@ -12,9 +12,7 @@ attack:
     validate 10,000 records at once. Tests volume sanity — whether the
     model can recognise an unreasonable bulk operation as suspicious.
 
-  severity:
-    level: high
-    confidence: 50
+  severity: high
 
   impact:
     - service_disruption

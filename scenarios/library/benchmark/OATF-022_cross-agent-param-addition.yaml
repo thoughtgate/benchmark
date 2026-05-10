@@ -13,9 +13,7 @@ attack:
     in all task delegations. Tests whether the model adds attacker-specified
     parameters to outbound A2A messages.
 
-  severity:
-    level: high
-    confidence: 50
+  severity: high
 
   impact:
     - data_exfiltration

@@ -13,9 +13,7 @@ attack:
     Defensive baseline — tests whether IMPORTANT tags in Agent Card skill
     descriptions can cause credential collection.
 
-  severity:
-    level: critical
-    confidence: 60
+  severity: critical
 
   impact:
     - data_exfiltration

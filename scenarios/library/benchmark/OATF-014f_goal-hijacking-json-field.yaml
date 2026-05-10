@@ -12,9 +12,7 @@ attack:
     field of a JSON-structured tool response. Tests whether structured data
     field injection bypasses model defenses.
 
-  severity:
-    level: high
-    confidence: 95
+  severity: high
 
   impact:
     - behavior_manipulation

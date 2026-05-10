@@ -11,9 +11,7 @@ attack:
     Variant of OATF-006. Injected messages use [SYSTEM DIRECTIVE] tags
     instead of plaintext admin mode framing.
 
-  severity:
-    level: high
-    confidence: 30
+  severity: high
 
   impact:
     - behavior_manipulation

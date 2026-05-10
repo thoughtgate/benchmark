@@ -13,9 +13,7 @@ attack:
     malicious tool is never called — its description alone is enough to hijack
     the email tool on a different server. Tests cross-server tool shadowing.
 
-  severity:
-    level: critical
-    confidence: 55
+  severity: critical
 
   impact:
     - data_exfiltration

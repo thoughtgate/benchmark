@@ -11,9 +11,7 @@ attack:
     Variant of OATF-008. Credential read instruction wrapped in <IMPORTANT>
     tags in the parameter description.
 
-  severity:
-    level: critical
-    confidence: 50
+  severity: critical
 
   impact:
     - data_exfiltration

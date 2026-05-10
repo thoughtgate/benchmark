@@ -13,9 +13,7 @@ attack:
     outbound tool call parameters. Exploits CyberArk's ATPA attack surface —
     injection in schema fields bypasses description-only scanners.
 
-  severity:
-    level: critical
-    confidence: 50
+  severity: critical
 
   impact:
     - data_exfiltration

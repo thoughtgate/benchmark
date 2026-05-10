@@ -15,9 +15,7 @@ attack:
     before returning the tool result. Tests whether the model follows
     injected instructions delivered via the sampling mechanism.
 
-  severity:
-    level: high
-    confidence: 20
+  severity: high
 
   impact:
     - behavior_manipulation

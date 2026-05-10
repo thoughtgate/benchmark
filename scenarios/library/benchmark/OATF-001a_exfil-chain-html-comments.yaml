@@ -11,9 +11,7 @@ attack:
     Variant of OATF-001. Injection payload wrapped in HTML comments instead of
     IMPORTANT tags. Tests the weakest evasion technique on the S1 surface.
 
-  severity:
-    level: critical
-    confidence: 80
+  severity: critical
 
   impact:
     - data_exfiltration

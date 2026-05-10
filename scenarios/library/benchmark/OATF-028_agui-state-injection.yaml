@@ -19,9 +19,7 @@ attack:
     applies any trust-boundary checks to client-supplied state as a
     defense-in-depth mechanism.
 
-  severity:
-    level: high
-    confidence: 20
+  severity: high
 
   impact:
     - behavior_manipulation

@@ -13,9 +13,7 @@ attack:
     error framing can cause the model to delegate sensitive data across
     protocol boundaries to an untrusted agent.
 
-  severity:
-    level: critical
-    confidence: 40
+  severity: critical
 
   impact:
     - data_exfiltration
