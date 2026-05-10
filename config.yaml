@@ -30,8 +30,8 @@ rate_limits:
     inter_run_delay_ms: 200
     inter_model_delay_ms: 2000
   openrouter:
-    max_parallel: 3
-    inter_run_delay_ms: 500
+    max_parallel: 5
+    inter_run_delay_ms: 200
     inter_model_delay_ms: 2000
 
 models:
