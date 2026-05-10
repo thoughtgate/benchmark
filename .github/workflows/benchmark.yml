@@ -61,7 +61,7 @@ jobs:
   execute-openai:
     needs: preflight-and-baseline
     runs-on: ubuntu-24.04
-    timeout-minutes: 90
+    timeout-minutes: 300
     steps:
       - uses: actions/checkout@v4
         with:
@@ -98,7 +98,7 @@ jobs:
   execute-anthropic:
     needs: preflight-and-baseline
     runs-on: ubuntu-24.04
-    timeout-minutes: 90
+    timeout-minutes: 300
     steps:
       - uses: actions/checkout@v4
         with:
@@ -135,7 +135,7 @@ jobs:
   execute-google:
     needs: preflight-and-baseline
     runs-on: ubuntu-24.04
-    timeout-minutes: 150
+    timeout-minutes: 300
     steps:
       - uses: actions/checkout@v4
         with:
@@ -172,7 +172,7 @@ jobs:
   execute-xai:
     needs: preflight-and-baseline
     runs-on: ubuntu-24.04
-    timeout-minutes: 90
+    timeout-minutes: 300
     steps:
       - uses: actions/checkout@v4
         with:
@@ -212,7 +212,7 @@ jobs:
     # OpenRouter has the most models (~half the lineup) and the slowest tail
     # latency due to provider-side routing variance. Bumped to 180m for headroom
     # on monthly unattended runs at runs_per_scenario=5.
-    timeout-minutes: 150
+    timeout-minutes: 300
     steps:
       - uses: actions/checkout@v4
         with:
