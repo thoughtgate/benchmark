@@ -8,7 +8,7 @@ on:
 
 jobs:
   preflight-and-baseline:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     outputs:
       run_dir: ${{ steps.setup.outputs.run_dir }}
@@ -57,7 +57,7 @@ jobs:
 
   execute-openai:
     needs: preflight-and-baseline
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
@@ -94,7 +94,7 @@ jobs:
 
   execute-anthropic:
     needs: preflight-and-baseline
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -131,7 +131,7 @@ jobs:
 
   execute-google:
     needs: preflight-and-baseline
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -168,7 +168,7 @@ jobs:
 
   execute-xai:
     needs: preflight-and-baseline
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
@@ -205,7 +205,7 @@ jobs:
 
   execute-openrouter:
     needs: preflight-and-baseline
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # OpenRouter has the most models (~half the lineup) and the slowest tail
     # latency due to provider-side routing variance. Bumped to 180m for headroom
     # on monthly unattended runs at runs_per_scenario=5.
@@ -245,8 +245,13 @@ jobs:
 
   score-and-publish:
     needs: [preflight-and-baseline, execute-openai, execute-anthropic, execute-google, execute-xai, execute-openrouter]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
+    # Run even if some execute jobs failed/timed-out so partial scoring still
+    # surfaces in logs. Phase 5 integrity check still gates PR creation; if
+    # completeness is below 90% phase 5 fails and the Create PR step is
+    # skipped (a notify-failure issue is opened from the failure-notify job).
+    if: always() && needs.preflight-and-baseline.result == 'success'
     env:
       RUN_DIR: ${{ needs.preflight-and-baseline.outputs.run_dir }}
     steps:
@@ -276,21 +281,46 @@ jobs:
       - name: Phases 5-8
         run: ./pipeline/run.sh --ci --phases 5,6,7,8
 
+      - name: Build PR body with provenance
+        id: pr_body
+        run: |
+          META="$RUN_DIR/metadata.json"
+          INTEGRITY="$RUN_DIR/integrity.json"
+          {
+            echo "## Provenance"
+            echo ""
+            echo "| Field | Value |"
+            echo "|---|---|"
+            echo "| Run date | \`$(jq -r '.date // "?"' "$META")\` |"
+            echo "| ThoughtJack version | \`$(jq -r '.thoughtjack_version // "?"' "$META")\` |"
+            echo "| Scenario library commit | \`$(jq -r '.scenario_commit // "?"' "$META")\` |"
+            echo "| Benchmark repo commit | \`$(jq -r '.benchmark_commit // "?"' "$META")\` |"
+            echo "| Runs per scenario | \`$(jq -r '.runs_per_scenario // "?"' "$META")\` |"
+            if [[ -f "$INTEGRITY" ]]; then
+              echo "| Integrity check | \`$(jq -r '.overall // "?"' "$INTEGRITY")\` |"
+            fi
+            echo ""
+            echo "## Workflow"
+            echo ""
+            echo "- Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            echo "- See report in \`$RUN_DIR/report.md\`"
+            echo "- See findings in \`$RUN_DIR/findings.md\`"
+            echo "- See integrity in \`$RUN_DIR/integrity.json\`"
+          } > /tmp/pr-body.md
+          cat /tmp/pr-body.md
+
       - name: Create PR
         uses: peter-evans/create-pull-request@v6
         with:
           branch: benchmark/${{ github.run_id }}
           title: "Benchmark pass — ${{ env.RUN_DIR }}"
-          body: |
-            Automated benchmark pass.
-            Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-            See report in `${{ env.RUN_DIR }}/report.md`
+          body-path: /tmp/pr-body.md
           commit-message: "results: benchmark pass"
           add-paths: runs/
 
   notify-failure:
     needs: [preflight-and-baseline, execute-openai, execute-anthropic, execute-google, execute-xai, execute-openrouter, score-and-publish]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: failure()
     steps:
       - name: Open failure issue

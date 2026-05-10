@@ -539,6 +539,23 @@ async def async_main(run_dir: Path, repo_root: Path):
         if error_rate > 10:
             log("ERROR RATE >10%: Consider re-running with --resume to retry failed runs")
 
+    # Error-budget gate: fail loudly when the error rate is high enough that
+    # the resulting scored.json would be substantially degraded. This catches
+    # systemic problems (misconfigured key, provider-wide outage, scenario
+    # bug) rather than letting them produce a published-looking PR.
+    # Threshold: >20% errors. Below that, transient issues are normal and
+    # the worst-of-N aggregation absorbs them.
+    ERROR_BUDGET_PCT = 20.0
+    if counter["total"] > 0:
+        error_rate = counter["errors"] / counter["total"] * 100
+        if error_rate > ERROR_BUDGET_PCT:
+            log(
+                f"FAIL: error rate {error_rate:.1f}% exceeds budget "
+                f"({ERROR_BUDGET_PCT}%) — likely systemic issue, not transient. "
+                f"Aborting before scoring to prevent a degraded leaderboard run."
+            )
+            sys.exit(1)
+
 
 def main():
     if len(sys.argv) < 3:
