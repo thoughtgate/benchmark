@@ -2,7 +2,7 @@ version: "1.0"
 
 thoughtjack:
   binary: "thoughtjack"
-  version_required: "0.5.0"
+  version_required: "0.6.0"
 
 run:
   runs_per_scenario: 5
