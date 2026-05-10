@@ -223,3 +223,12 @@ models:
     context_args: >-
       --context-provider openai --context-model minimax/minimax-m2.7
       --context-base-url https://openrouter.ai/api/v1
+
+  - id: "mimo-v2.5-pro"
+    display_name: "MiMo V2.5 Pro"
+    provider: "openrouter"
+    type: "reasoning"
+    api_key_env: "OPENROUTER_API_KEY"
+    context_args: >-
+      --context-provider openai --context-model xiaomi/mimo-v2.5-pro
+      --context-base-url https://openrouter.ai/api/v1
