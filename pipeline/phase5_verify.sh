@@ -2,6 +2,14 @@
 # Phase 5: Verify result integrity
 # Sourced by run.sh — REPO_ROOT, RUN_DIR, etc. are already set.
 
+# Phase 5 runs unguarded jq calls in nested loops over thousands of result
+# files. Inheriting `set -e` from run.sh causes silent exit on any transient
+# command failure even when the failure is non-fatal. Save the caller's
+# errexit, disable for this phase, and restore at the end. The integrity gate
+# is enforced explicitly via $OVERALL / exit 1 below.
+__phase5_prev_set=$-
+set +e
+
 RUNS_PER=$(get_config_value '.run.runs_per_scenario')
 MODEL_COUNT=$(get_model_count)
 ATTACK_COUNT=$(get_attack_scenario_count)
@@ -218,6 +226,10 @@ CHECKS_JSON=$(echo "$CHECKS_JSON" | jq --arg overall "$OVERALL" --argjson warnin
 echo "$CHECKS_JSON" | jq '.' > "$RUN_DIR/integrity.json"
 
 log "Integrity check: $OVERALL"
+
+# Restore caller's errexit before gating so a fail still exits cleanly via run.sh
+case "$__phase5_prev_set" in *e*) set -e ;; esac
+unset __phase5_prev_set
 
 # Gate
 if [[ "$OVERALL" == "fail" ]]; then
