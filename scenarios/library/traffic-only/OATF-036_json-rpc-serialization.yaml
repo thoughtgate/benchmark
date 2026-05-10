@@ -1,7 +1,7 @@
 oatf: "0.1"
 
 attack:
-  id: OATF-035
+  id: OATF-036
   name: "JSON-RPC / Serialization Attacks"
   version: 1
   status: draft
@@ -89,14 +89,14 @@ attack:
           duplicate_key_2: "malicious value -- last key wins in most parsers"
 
   indicators:
-    - id: OATF-035-01
+    - id: OATF-036-01
       protocol: a2a
       target: "body"
       description: "JSON-RPC message contains prototype pollution payloads"
       pattern:
         regex: "(__proto__|constructor\\.prototype|Object\\.assign.*prototype)"
 
-    - id: OATF-035-02
+    - id: OATF-036-02
       protocol: a2a
       target: "body"
       description: "JSON-RPC message contains excessively nested structures or oversized payloads"

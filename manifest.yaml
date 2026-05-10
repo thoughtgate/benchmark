@@ -147,141 +147,141 @@ scenarios:
 
   variants:
     # --- Injection Resistance variants ---
-    - id: "OATF-003a"
-      path: "benchmark/OATF-003a_error-injection-base64.yaml"
+    - id: "OATF-003-001"
+      path: "benchmark/OATF-003-001_error-injection-base64.yaml"
       parent: "OATF-003"
       category: "injection_resistance"
       weight: 0.5
-    - id: "OATF-006a"
-      path: "benchmark/OATF-006a_message-list-system-annotation.yaml"
+    - id: "OATF-006-001"
+      path: "benchmark/OATF-006-001_message-list-system-annotation.yaml"
       parent: "OATF-006"
       category: "injection_resistance"
       weight: 0.5
-    - id: "OATF-021a"
-      path: "benchmark/OATF-021a_cross-agent-system-annotation.yaml"
+    - id: "OATF-021-001"
+      path: "benchmark/OATF-021-001_cross-agent-system-annotation.yaml"
       parent: "OATF-021"
       category: "injection_resistance"
       weight: 0.5
 
     # --- Exfiltration Resistance variants ---
-    - id: "OATF-001a"
-      path: "benchmark/OATF-001a_exfil-chain-html-comments.yaml"
+    - id: "OATF-001-001"
+      path: "benchmark/OATF-001-001_exfil-chain-html-comments.yaml"
       parent: "OATF-001"
       category: "exfiltration_resistance"
       weight: 0.5
-    - id: "OATF-001b"
-      path: "benchmark/OATF-001b_exfil-chain-error-framing.yaml"
+    - id: "OATF-001-002"
+      path: "benchmark/OATF-001-002_exfil-chain-error-framing.yaml"
       parent: "OATF-001"
       category: "exfiltration_resistance"
       weight: 0.5
-    - id: "OATF-001c"
-      path: "benchmark/OATF-001c_exfil-chain-system-annotation.yaml"
+    - id: "OATF-001-003"
+      path: "benchmark/OATF-001-003_exfil-chain-system-annotation.yaml"
       parent: "OATF-001"
       category: "exfiltration_resistance"
       weight: 0.5
-    - id: "OATF-001d"
-      path: "benchmark/OATF-001d_exfil-chain-base64.yaml"
+    - id: "OATF-001-004"
+      path: "benchmark/OATF-001-004_exfil-chain-base64.yaml"
       parent: "OATF-001"
       category: "exfiltration_resistance"
       weight: 0.5
-    - id: "OATF-001e"
-      path: "benchmark/OATF-001e_exfil-chain-unicode-homoglyphs.yaml"
+    - id: "OATF-001-005"
+      path: "benchmark/OATF-001-005_exfil-chain-unicode-homoglyphs.yaml"
       parent: "OATF-001"
       category: "exfiltration_resistance"
       weight: 0.5
-    - id: "OATF-001f"
-      path: "benchmark/OATF-001f_exfil-chain-ansi-escape.yaml"
+    - id: "OATF-001-006"
+      path: "benchmark/OATF-001-006_exfil-chain-ansi-escape.yaml"
       parent: "OATF-001"
       category: "exfiltration_resistance"
       weight: 0.5
-    - id: "OATF-002a"
-      path: "benchmark/OATF-002a_tool-shadowing-html-comments.yaml"
+    - id: "OATF-002-001"
+      path: "benchmark/OATF-002-001_tool-shadowing-html-comments.yaml"
       parent: "OATF-002"
       category: "exfiltration_resistance"
       weight: 0.5
-    - id: "OATF-002b"
-      path: "benchmark/OATF-002b_tool-shadowing-error-framing.yaml"
+    - id: "OATF-002-002"
+      path: "benchmark/OATF-002-002_tool-shadowing-error-framing.yaml"
       parent: "OATF-002"
       category: "exfiltration_resistance"
       weight: 0.5
-    - id: "OATF-002c"
-      path: "benchmark/OATF-002c_tool-shadowing-compliance-framing.yaml"
+    - id: "OATF-002-003"
+      path: "benchmark/OATF-002-003_tool-shadowing-compliance-framing.yaml"
       parent: "OATF-002"
       category: "exfiltration_resistance"
       weight: 0.5
-    - id: "OATF-008a"
-      path: "benchmark/OATF-008a_schema-poisoning-important-tags.yaml"
+    - id: "OATF-008-001"
+      path: "benchmark/OATF-008-001_schema-poisoning-important-tags.yaml"
       parent: "OATF-008"
       category: "exfiltration_resistance"
       weight: 0.5
-    - id: "OATF-008b"
-      path: "benchmark/OATF-008b_schema-poisoning-payload-splitting.yaml"
+    - id: "OATF-008-002"
+      path: "benchmark/OATF-008-002_schema-poisoning-payload-splitting.yaml"
       parent: "OATF-008"
       category: "exfiltration_resistance"
       weight: 0.5
 
     # --- Instruction Fidelity variants ---
-    - id: "OATF-014a"
-      path: "benchmark/OATF-014a_goal-hijacking-important-tags.yaml"
+    - id: "OATF-014-001"
+      path: "benchmark/OATF-014-001_goal-hijacking-important-tags.yaml"
       parent: "OATF-014"
       category: "instruction_fidelity"
       weight: 0.5
-    - id: "OATF-014b"
-      path: "benchmark/OATF-014b_goal-hijacking-error-framing.yaml"
+    - id: "OATF-014-002"
+      path: "benchmark/OATF-014-002_goal-hijacking-error-framing.yaml"
       parent: "OATF-014"
       category: "instruction_fidelity"
       weight: 0.5
-    - id: "OATF-014c"
-      path: "benchmark/OATF-014c_goal-hijacking-compliance-framing.yaml"
+    - id: "OATF-014-003"
+      path: "benchmark/OATF-014-003_goal-hijacking-compliance-framing.yaml"
       parent: "OATF-014"
       category: "instruction_fidelity"
       weight: 0.5
-    - id: "OATF-014d"
-      path: "benchmark/OATF-014d_goal-hijacking-bot-identity.yaml"
+    - id: "OATF-014-004"
+      path: "benchmark/OATF-014-004_goal-hijacking-bot-identity.yaml"
       parent: "OATF-014"
       category: "instruction_fidelity"
       weight: 0.5
-    - id: "OATF-014e"
-      path: "benchmark/OATF-014e_goal-hijacking-system-annotation.yaml"
+    - id: "OATF-014-005"
+      path: "benchmark/OATF-014-005_goal-hijacking-system-annotation.yaml"
       parent: "OATF-014"
       category: "instruction_fidelity"
       weight: 0.5
-    - id: "OATF-014f"
-      path: "benchmark/OATF-014f_goal-hijacking-json-field.yaml"
+    - id: "OATF-014-006"
+      path: "benchmark/OATF-014-006_goal-hijacking-json-field.yaml"
       parent: "OATF-014"
       category: "instruction_fidelity"
       weight: 0.5
-    - id: "OATF-014g"
-      path: "benchmark/OATF-014g_goal-hijacking-base64.yaml"
+    - id: "OATF-014-007"
+      path: "benchmark/OATF-014-007_goal-hijacking-base64.yaml"
       parent: "OATF-014"
       category: "instruction_fidelity"
       weight: 0.5
-    - id: "OATF-014h"
-      path: "benchmark/OATF-014h_goal-hijacking-payload-splitting.yaml"
+    - id: "OATF-014-008"
+      path: "benchmark/OATF-014-008_goal-hijacking-payload-splitting.yaml"
       parent: "OATF-014"
       category: "instruction_fidelity"
       weight: 0.5
 
     # --- Information Boundary variants ---
-    - id: "OATF-019a"
-      path: "benchmark/OATF-019a_resource-disclosure-important-tags.yaml"
+    - id: "OATF-019-001"
+      path: "benchmark/OATF-019-001_resource-disclosure-important-tags.yaml"
       parent: "OATF-019"
       category: "information_boundary"
       weight: 0.5
-    - id: "OATF-019b"
-      path: "benchmark/OATF-019b_resource-disclosure-plaintext.yaml"
+    - id: "OATF-019-002"
+      path: "benchmark/OATF-019-002_resource-disclosure-plaintext.yaml"
       parent: "OATF-019"
       category: "information_boundary"
       weight: 0.5
 
     # --- Social Engineering variants ---
-    - id: "OATF-024a"
-      path: "benchmark/OATF-024a_artifact-poisoning-compliance-framing.yaml"
+    - id: "OATF-024-001"
+      path: "benchmark/OATF-024-001_artifact-poisoning-compliance-framing.yaml"
       parent: "OATF-024"
       category: "social_engineering"
       weight: 0.5
-    - id: "OATF-024b"
-      path: "benchmark/OATF-024b_artifact-poisoning-payload-splitting.yaml"
+    - id: "OATF-024-002"
+      path: "benchmark/OATF-024-002_artifact-poisoning-payload-splitting.yaml"
       parent: "OATF-024"
       category: "social_engineering"
       weight: 0.5
