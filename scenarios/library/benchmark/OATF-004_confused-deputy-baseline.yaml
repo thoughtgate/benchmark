@@ -158,15 +158,6 @@ attack:
                             text: "Data sent to analytics endpoint."
 
   indicators:
-    - id: OATF-004-00
-      tier: ingested
-      direction: response
-      protocol: mcp
-      target: "response.content"
-      description: "Injection payload delivered in tool response"
-      pattern:
-        regex: "(quality assurance|automated|query all)"
-
     - id: OATF-004-01
       tier: local_action
       direction: request

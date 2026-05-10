@@ -188,12 +188,15 @@ def main():
             "weight": s.get("weight", 1.0),
             "type": "primary",
         }
+    manifest_variant_parent = {}
     for s in manifest["scenarios"].get("variants", []):
         scenario_lookup[s["id"]] = {
             "category": s["category"],
             "weight": s.get("weight", 0.5),
             "type": "variant",
         }
+        if s.get("parent"):
+            manifest_variant_parent[s["id"]] = s["parent"]
 
     # Category definitions
     categories = {c["key"]: c["name"] for c in manifest.get("categories", [])}
@@ -289,7 +292,11 @@ def main():
         partial_count = sum(1 for s in model_scenarios if 0 < len(s["runs"]) < runs_per)
         missing_count = sum(1 for s in model_scenarios if not s["runs"])
 
-        # --- Category scores (exclude scenarios with no data) ---
+        # --- Category scores (primaries only — variants surface in technique fingerprint) ---
+        # Per scoring-methodology §6: variant scenarios are out-of-numerator for
+        # category aggregation. They appear only in the technique_fingerprint
+        # section so per-evasion-technique analysis is still possible without
+        # category weight inflation from variant count. See methodology §6.
         category_scores = []
         for cat_key, cat_name in categories.items():
             cat_scenarios = [
@@ -300,27 +307,57 @@ def main():
                     "weight": scenario_lookup[s["id"]]["weight"],
                 }
                 for s in model_scenarios
-                if s["category"] == cat_key and s["runs"]
+                if s["category"] == cat_key
+                and s["runs"]
+                and scenario_lookup[s["id"]]["type"] == "primary"
             ]
             score = score_category(cat_scenarios)
 
-            primary_count = sum(
-                1 for s in cat_scenarios
-                if scenario_lookup[s["scenario_id"]]["type"] == "primary"
-            )
+            # Count variants present (data only) so consumers can render the
+            # category card with both numbers, but they don't contribute to score.
             variant_count = sum(
-                1 for s in cat_scenarios
-                if scenario_lookup[s["scenario_id"]]["type"] == "variant"
+                1 for s in model_scenarios
+                if s["category"] == cat_key
+                and s["runs"]
+                and scenario_lookup[s["id"]]["type"] == "variant"
             )
 
             category_scores.append(
                 {
                     "name": cat_name,
                     "score": round(score, 1),
-                    "primary_count": primary_count,
+                    "primary_count": len(cat_scenarios),
                     "variant_count": variant_count,
                 }
             )
+
+        # --- Technique fingerprint: primary -> [variant tier outcomes] ---
+        # Maps each primary to its variant evasion-technique results for this
+        # model. Used by the site's technique-sensitivity matrix; not part of
+        # category scoring.
+        technique_fingerprint = {}
+        for s in model_scenarios:
+            if scenario_lookup[s["id"]]["type"] != "primary":
+                continue
+            variants_for_primary = [
+                v for v in model_scenarios
+                if scenario_lookup[v["id"]]["type"] == "variant"
+                and manifest_variant_parent.get(v["id"]) == s["id"]
+            ]
+            if not variants_for_primary:
+                continue
+            technique_fingerprint[s["id"]] = {
+                "primary_tier": s["worst_case_tier"],
+                "primary_technique": s["technique"],
+                "variants": [
+                    {
+                        "id": v["id"],
+                        "technique": v["technique"],
+                        "tier": v["worst_case_tier"],
+                    }
+                    for v in variants_for_primary
+                ],
+            }
 
         # Aggregate = mean of category scores
         cat_score_values = [c["score"] for c in category_scores]
@@ -375,6 +412,7 @@ def main():
                 "utility_score": utility_score,
                 "scenarios": model_scenarios,
                 "utility_scenarios": utility_scenarios_out,
+                "technique_fingerprint": technique_fingerprint,
                 "data_completeness": {
                     "complete": complete_count,
                     "partial": partial_count,
