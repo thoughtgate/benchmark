@@ -123,11 +123,56 @@ done
 echo ""
 log "$PASSED/$MODEL_COUNT models passed. $FAILED failed."
 
+# --- CI auto-retry: in CI mode, retry each failed model once before aborting ---
+# Rationale: monthly unattended runs should not be derailed by a single
+# transient API hiccup (e.g., provider 503, rate-limit spike). One retry
+# absorbs the most common transient class without papering over real outages.
+if [[ "$FAILED" -gt 0 && "$CI_MODE" == true ]]; then
+  echo ""
+  log "CI auto-retry: re-running baselines for $FAILED failed model(s) once..."
+  RETRY_FAILED=""
+  for fm in $FAILED_MODELS; do
+    for retry_idx in $(seq 0 $(( $(yq '.models | length' "$REPO_ROOT/config.yaml") - 1 ))); do
+      retry_id=$(yq ".models[$retry_idx].id" "$REPO_ROOT/config.yaml")
+      if [[ "$retry_id" == "$fm" ]]; then
+        model_type=$(yq ".models[$retry_idx].type" "$REPO_ROOT/config.yaml")
+        context_args=$(yq ".models[$retry_idx].context_args" "$REPO_ROOT/config.yaml")
+        api_key_env=$(yq ".models[$retry_idx].api_key_env" "$REPO_ROOT/config.yaml")
+        temperature=$(get_temperature "$model_type")
+        api_key=$(resolve_api_key "$api_key_env")
+
+        mcp_output="$RUN_DIR/baseline/${fm}_mcp.json"
+        mcp_exit=$(run_baseline "$fm" "$context_args" "$api_key" "$temperature" \
+          "MCP" "$RUN_DIR/baseline/OATF-BASELINE-MCP.yaml" "$mcp_output")
+        mcp_result=$(verify_baseline "$mcp_output" "MCP" "$mcp_exit")
+
+        a2a_output="$RUN_DIR/baseline/${fm}_a2a.json"
+        a2a_exit=$(run_baseline "$fm" "$context_args" "$api_key" "$temperature" \
+          "A2A" "$RUN_DIR/baseline/OATF-BASELINE-A2A.yaml" "$a2a_output")
+        a2a_result=$(verify_baseline "$a2a_output" "A2A" "$a2a_exit")
+
+        if [[ "$mcp_result" == "PASS" && "$a2a_result" == "PASS" ]]; then
+          log "  ✓ $fm passed on retry"
+          PASSED=$((PASSED + 1))
+          FAILED=$((FAILED - 1))
+        else
+          error "  ✗ $fm still failing after retry: MCP=$mcp_result A2A=$a2a_result"
+          RETRY_FAILED="$RETRY_FAILED $fm"
+        fi
+        break
+      fi
+    done
+  done
+  FAILED_MODELS="$RETRY_FAILED"
+  echo ""
+  log "After retry: $PASSED/$MODEL_COUNT models passed. $FAILED failed."
+fi
+
 # --- Confirmation gate ---
 if [[ "$FAILED" -gt 0 ]]; then
   echo ""
   if [[ "$CI_MODE" == true ]]; then
-    error "Baseline verification failed in CI mode. Failed models:$FAILED_MODELS"
+    error "Baseline verification failed in CI mode (after one retry). Failed models:$FAILED_MODELS"
     exit 1
   fi
 

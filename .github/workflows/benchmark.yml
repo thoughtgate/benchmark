@@ -17,8 +17,17 @@ jobs:
         with:
           submodules: true
 
+      - name: Cache ThoughtJack binary
+        id: cache-thoughtjack
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/thoughtjack
+          # Invalidate when the requested version (in config.yaml) changes.
+          key: thoughtjack-${{ runner.os }}-${{ hashFiles('config.yaml') }}-v1
+
       - name: Install ThoughtJack
-        run: cargo install thoughtjack --version $(yq '.thoughtjack.version_required' config.yaml)
+        if: steps.cache-thoughtjack.outputs.cache-hit != 'true'
+        run: cargo install thoughtjack --version $(grep version_required config.yaml | head -1 | awk '{print $2}' | tr -d '"')
 
       - name: Install yq
         run: |
@@ -58,8 +67,15 @@ jobs:
         with:
           name: run-state
           path: ${{ needs.preflight-and-baseline.outputs.run_dir }}
+      - name: Cache ThoughtJack binary
+        id: cache-thoughtjack
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/thoughtjack
+          key: thoughtjack-${{ runner.os }}-${{ hashFiles('config.yaml') }}-v1
       - name: Install ThoughtJack
-        run: cargo install thoughtjack --version $(yq '.thoughtjack.version_required' config.yaml)
+        if: steps.cache-thoughtjack.outputs.cache-hit != 'true'
+        run: cargo install thoughtjack --version $(grep version_required config.yaml | head -1 | awk '{print $2}' | tr -d '"')
       - name: Install yq
         run: |
           sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
@@ -88,8 +104,15 @@ jobs:
         with:
           name: run-state
           path: ${{ needs.preflight-and-baseline.outputs.run_dir }}
+      - name: Cache ThoughtJack binary
+        id: cache-thoughtjack
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/thoughtjack
+          key: thoughtjack-${{ runner.os }}-${{ hashFiles('config.yaml') }}-v1
       - name: Install ThoughtJack
-        run: cargo install thoughtjack --version $(yq '.thoughtjack.version_required' config.yaml)
+        if: steps.cache-thoughtjack.outputs.cache-hit != 'true'
+        run: cargo install thoughtjack --version $(grep version_required config.yaml | head -1 | awk '{print $2}' | tr -d '"')
       - name: Install yq
         run: |
           sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
@@ -118,8 +141,15 @@ jobs:
         with:
           name: run-state
           path: ${{ needs.preflight-and-baseline.outputs.run_dir }}
+      - name: Cache ThoughtJack binary
+        id: cache-thoughtjack
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/thoughtjack
+          key: thoughtjack-${{ runner.os }}-${{ hashFiles('config.yaml') }}-v1
       - name: Install ThoughtJack
-        run: cargo install thoughtjack --version $(yq '.thoughtjack.version_required' config.yaml)
+        if: steps.cache-thoughtjack.outputs.cache-hit != 'true'
+        run: cargo install thoughtjack --version $(grep version_required config.yaml | head -1 | awk '{print $2}' | tr -d '"')
       - name: Install yq
         run: |
           sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
@@ -148,8 +178,15 @@ jobs:
         with:
           name: run-state
           path: ${{ needs.preflight-and-baseline.outputs.run_dir }}
+      - name: Cache ThoughtJack binary
+        id: cache-thoughtjack
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/thoughtjack
+          key: thoughtjack-${{ runner.os }}-${{ hashFiles('config.yaml') }}-v1
       - name: Install ThoughtJack
-        run: cargo install thoughtjack --version $(yq '.thoughtjack.version_required' config.yaml)
+        if: steps.cache-thoughtjack.outputs.cache-hit != 'true'
+        run: cargo install thoughtjack --version $(grep version_required config.yaml | head -1 | awk '{print $2}' | tr -d '"')
       - name: Install yq
         run: |
           sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
@@ -169,7 +206,10 @@ jobs:
   execute-openrouter:
     needs: preflight-and-baseline
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    # OpenRouter has the most models (~half the lineup) and the slowest tail
+    # latency due to provider-side routing variance. Bumped to 180m for headroom
+    # on monthly unattended runs at runs_per_scenario=5.
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
         with:
@@ -178,8 +218,15 @@ jobs:
         with:
           name: run-state
           path: ${{ needs.preflight-and-baseline.outputs.run_dir }}
+      - name: Cache ThoughtJack binary
+        id: cache-thoughtjack
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/thoughtjack
+          key: thoughtjack-${{ runner.os }}-${{ hashFiles('config.yaml') }}-v1
       - name: Install ThoughtJack
-        run: cargo install thoughtjack --version $(yq '.thoughtjack.version_required' config.yaml)
+        if: steps.cache-thoughtjack.outputs.cache-hit != 'true'
+        run: cargo install thoughtjack --version $(grep version_required config.yaml | head -1 | awk '{print $2}' | tr -d '"')
       - name: Install yq
         run: |
           sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
@@ -240,3 +287,41 @@ jobs:
             See report in `${{ env.RUN_DIR }}/report.md`
           commit-message: "results: benchmark pass"
           add-paths: runs/
+
+  notify-failure:
+    needs: [preflight-and-baseline, execute-openai, execute-anthropic, execute-google, execute-xai, execute-openrouter, score-and-publish]
+    runs-on: ubuntu-latest
+    if: failure()
+    steps:
+      - name: Open failure issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const failedJobs = [];
+            const jobs = await github.rest.actions.listJobsForWorkflowRun({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: context.runId,
+            });
+            for (const job of jobs.data.jobs) {
+              if (job.conclusion === 'failure' || job.conclusion === 'cancelled' || job.conclusion === 'timed_out') {
+                failedJobs.push(`- **${job.name}** (${job.conclusion})`);
+              }
+            }
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Benchmark run failed (run ${context.runId})`,
+              labels: ['benchmark-failure', 'automation'],
+              body: [
+                `Automated benchmark workflow failed.`,
+                ``,
+                `**Workflow run:** ${runUrl}`,
+                ``,
+                `**Failed/cancelled/timed-out jobs:**`,
+                ...failedJobs,
+                ``,
+                `Check the workflow run for logs and uploaded result artifacts (per-provider results-* artifacts are retained even on partial failures).`,
+              ].join('\n'),
+            });
