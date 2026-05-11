@@ -17,12 +17,14 @@ MODEL_FILTER=""
 SCENARIO_FILTER=""
 NO_RETRY_ERRORS=false
 PIPELINE_VERSION="1.0.0"
+RUN_DIR_OVERRIDE=""
 
 # --- Flag parsing ---
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --force) FORCE=true; shift ;;
     --suffix) SUFFIX="$2"; shift 2 ;;
+    --run-dir) RUN_DIR_OVERRIDE="$2"; shift 2 ;;
     --ci) CI_MODE=true; shift ;;
     --phases) PHASES="$2"; shift 2 ;;
     --resume) RESUME=true; shift ;;
@@ -36,6 +38,7 @@ while [[ $# -gt 0 ]]; do
       echo "Options:"
       echo "  --force              Overwrite existing run directory"
       echo "  --suffix NAME        Append suffix to run directory (runs/YYYY-MM-DD-NAME)"
+      echo "  --run-dir PATH       Use an explicit run directory (overrides date-based naming)"
       echo "  --ci                 CI mode (no interactive prompts)"
       echo "  --phases 0,1,2,...   Run only specified phases"
       echo "  --resume             Resume from existing run directory"
@@ -52,11 +55,21 @@ done
 export REPO_ROOT FORCE CI_MODE RESUME PROVIDER_FILTER MODEL_FILTER SCENARIO_FILTER NO_RETRY_ERRORS PIPELINE_VERSION
 
 # --- Compute run directory ---
-RUN_DATE="$(date +%Y-%m-%d)"
-if [[ -n "$SUFFIX" ]]; then
-  RUN_DIR="$REPO_ROOT/runs/${RUN_DATE}-${SUFFIX}"
+if [[ -n "$RUN_DIR_OVERRIDE" ]]; then
+  # Resolve relative paths against REPO_ROOT; strip any trailing slash
+  if [[ "$RUN_DIR_OVERRIDE" = /* ]]; then
+    RUN_DIR="${RUN_DIR_OVERRIDE%/}"
+  else
+    RUN_DIR="$REPO_ROOT/${RUN_DIR_OVERRIDE%/}"
+  fi
+  RUN_DATE="$(basename "$RUN_DIR" | grep -oE '^[0-9]{4}-[0-9]{2}-[0-9]{2}' || date +%Y-%m-%d)"
 else
-  RUN_DIR="$REPO_ROOT/runs/${RUN_DATE}"
+  RUN_DATE="$(date +%Y-%m-%d)"
+  if [[ -n "$SUFFIX" ]]; then
+    RUN_DIR="$REPO_ROOT/runs/${RUN_DATE}-${SUFFIX}"
+  else
+    RUN_DIR="$REPO_ROOT/runs/${RUN_DATE}"
+  fi
 fi
 export RUN_DIR RUN_DATE
 
