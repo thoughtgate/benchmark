@@ -4,3 +4,6 @@ out/
 .DS_Store
 *.log
 site/public/traces/
+claude.md
+__pycache__/
+.claude

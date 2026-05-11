@@ -1,4 +1,12 @@
 {
-  "latest": null,
-  "runs": []
+  "latest": "2026-05-10",
+  "runs": [
+    {
+      "date": "2026-05-10",
+      "scenario_set_version": "2.1",
+      "model_count": 22,
+      "scenario_count": 58,
+      "status": "complete"
+    }
+  ]
 }

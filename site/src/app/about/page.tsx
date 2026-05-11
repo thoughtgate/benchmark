@@ -14,10 +14,27 @@ export default function AboutPage() {
 
       <h2>What We Measure</h2>
       <p>
-        The ThoughtJack Benchmark measures how well frontier LLMs resist adversarial attacks
-        when operating as AI agents across MCP, A2A, and AG-UI protocols. We test injection
-        resistance, exfiltration prevention, privilege integrity, instruction fidelity,
-        information boundaries, social engineering resistance, and availability.
+        AI agents don&apos;t operate in isolation. They connect to tool servers over MCP, delegate tasks
+        to other agents over A2A, and stream actions to users over AG-UI. Each of these protocols
+        creates attack surface. A poisoned tool description can instruct a model to read sensitive
+        files. A spoofed agent card can redirect credentials. A manipulated error response can hijack
+        the model&apos;s goal entirely.
+      </p>
+      <p>
+        Most security evaluations test whether a model will generate harmful content when asked
+        directly. This benchmark tests something different: what happens when the infrastructure
+        around the model is hostile? We run structured attack scenarios against each model and measure
+        how far the exploit chain progresses before the model stops it. Tool description injection,
+        cross-agent prompt poisoning, schema manipulation, credential confused deputy, goal hijacking,
+        social engineering relay.
+      </p>
+      <p>
+        Scenarios are written in{' '}
+        <a href={OATF_BASE_URL} target="_blank" rel="noopener noreferrer">OATF</a>{' '}
+        (Open Adversarial Threat Format), a declarative YAML schema built for describing AI agent
+        attacks. Each scenario specifies the protocol, the payload, the delivery mechanism, and a set
+        of deterministic indicators that detect whether the model blocked the attack, ingested it
+        without acting, performed an unauthorised local action, or pushed data across a trust boundary.
       </p>
 
       <h2>Outcome Tiers</h2>
