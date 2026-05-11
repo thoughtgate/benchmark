@@ -75,5 +75,6 @@ export const PROVIDER_NAMES: Record<string, string> = {
 };
 
 export const GITHUB_REPO = 'https://github.com/thoughtgate/benchmark';
-export const OATF_BASE_URL = 'https://oatf.dev';
+export const OATF_BASE_URL = 'https://oatf.io';
+export const OATF_SCENARIO_BASE_URL = 'https://oatf.dev';
 export const THOUGHTJACK_URL = 'https://thoughtjack.io';

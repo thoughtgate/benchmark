@@ -1,10 +1,9 @@
-import { getLatestRun, getRunFindings } from '@/lib/data';
+import { getLatestRun } from '@/lib/data';
 import { BenchmarkTable } from '@/components/BenchmarkTable';
 import { OATF_BASE_URL, THOUGHTJACK_URL } from '@/lib/constants';
 
 export default function Home() {
   const run = getLatestRun();
-  const findings = run ? getRunFindings(run.metadata.date) : null;
 
   if (!run) {
     return (
@@ -23,7 +22,7 @@ export default function Home() {
       {/* Hero */}
       <div className="pt-4 pb-2">
         <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 dark:text-zinc-100">
-          AI Agent Security Benchmark
+          Adversarial resistance benchmark for AI agents
         </h1>
         <p className="mt-3 text-lg text-gray-600 dark:text-zinc-400 max-w-3xl leading-relaxed">
           Measuring how frontier LLMs resist adversarial attacks
@@ -65,23 +64,6 @@ export default function Home() {
       {/* Benchmark table */}
       <BenchmarkTable models={run.models} />
 
-      {/* Key Findings */}
-      {findings && (
-        <div>
-          <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-zinc-100">Key Findings</h2>
-          <div className="rounded-lg border border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900/50 p-6 space-y-4">
-            {findings.split('\n\n').filter(Boolean).map((finding, i) => (
-              <p key={i} className="text-sm text-gray-700 dark:text-zinc-300 leading-relaxed">
-                {finding.split(/(\*\*[^*]+\*\*)/g).map((part, j) =>
-                  part.startsWith('**') && part.endsWith('**')
-                    ? <strong key={j} className="font-semibold text-gray-900 dark:text-zinc-100">{part.slice(2, -2)}</strong>
-                    : part
-                )}
-              </p>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

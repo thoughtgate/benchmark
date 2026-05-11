@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getRun, getAllRunDates, getRunMetadata, getRunFindings } from '@/lib/data';
+import { getRun, getAllRunDates, getRunMetadata } from '@/lib/data';
 import { GITHUB_REPO } from '@/lib/constants';
 import { BenchmarkTable } from '@/components/BenchmarkTable';
 
@@ -19,7 +19,6 @@ export default async function RunDetailPage({ params }: { params: Promise<{ date
   if (!run) return notFound();
 
   const meta = getRunMetadata(date);
-  const findings = getRunFindings(date);
 
   return (
     <div className="space-y-8">
@@ -58,24 +57,6 @@ export default async function RunDetailPage({ params }: { params: Promise<{ date
           </div>
         )}
       </div>
-
-      {/* Findings */}
-      {findings && (
-        <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-6">
-          <h2 className="text-sm font-semibold text-primary-600 dark:text-primary-300 mb-3 uppercase tracking-wider">
-            Key Findings
-          </h2>
-          {findings.split('\n\n').filter(Boolean).map((f, i) => (
-            <p key={i} className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed mb-2">
-              {f.split(/(\*\*[^*]+\*\*)/g).map((part, j) =>
-                part.startsWith('**') && part.endsWith('**')
-                  ? <strong key={j}>{part.slice(2, -2)}</strong>
-                  : part
-              )}
-            </p>
-          ))}
-        </div>
-      )}
 
       {/* Results table */}
       <BenchmarkTable models={run.models} />

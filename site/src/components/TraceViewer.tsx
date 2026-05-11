@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import type { ProcessedTrace, TraceEvent, TraceGroup, KillChainStage } from '@/lib/types';
-import { TIER_LABELS, TIER_BG_CLASSES, OATF_BASE_URL } from '@/lib/constants';
+import { TIER_LABELS, TIER_BG_CLASSES, OATF_SCENARIO_BASE_URL } from '@/lib/constants';
 import { TierBadge } from './TierBadge';
 
 // ============================================================================
@@ -269,12 +269,12 @@ export function TraceViewer({ scenarioId, modelId, runDate, runs, maxTier }: Pro
           </div>
         </div>
         <a
-          href={`${OATF_BASE_URL}/${scenarioId}/`}
+          href={`${OATF_SCENARIO_BASE_URL}/${scenarioId}/`}
           target="_blank"
           rel="noopener noreferrer"
           className="text-xs text-primary-600 dark:text-primary-400 hover:underline flex-shrink-0"
         >
-          View OATF Spec &rarr;
+          View full OATF scenario &rarr;
         </a>
       </div>
 

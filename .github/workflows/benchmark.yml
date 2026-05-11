@@ -210,9 +210,9 @@ jobs:
     needs: preflight-and-baseline
     runs-on: ubuntu-24.04
     # OpenRouter has the most models (~half the lineup) and the slowest tail
-    # latency due to provider-side routing variance. Bumped to 180m for headroom
-    # on monthly unattended runs at runs_per_scenario=5.
-    timeout-minutes: 300
+    # latency due to provider-side routing variance. Last run took ~5h; 480m
+    # gives headroom for slower runs at runs_per_scenario=5.
+    timeout-minutes: 480
     steps:
       - uses: actions/checkout@v4
         with:

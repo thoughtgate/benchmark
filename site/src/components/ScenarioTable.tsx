@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, Fragment } from 'react';
 import type { ScenarioResult, SortDirection } from '@/lib/types';
-import { OATF_BASE_URL } from '@/lib/constants';
+import { OATF_SCENARIO_BASE_URL } from '@/lib/constants';
 import { TierBadge } from './TierBadge';
 import { TraceViewer } from './TraceViewer';
 
@@ -106,10 +106,9 @@ export function ScenarioTable({ scenarios, initialCategoryFilter, runDate, model
             {filtered.map((s) => {
               const isExpanded = expandedId === s.id;
               return (
-                <>
-                  <tr
-                    key={s.id}
-                    id={s.id}
+                <Fragment key={s.id}>
+                <tr
+                  id={s.id}
                     className={`transition-colors ${
                       hasTraces ? 'cursor-pointer' : ''
                     } ${
@@ -127,15 +126,18 @@ export function ScenarioTable({ scenarios, initialCategoryFilter, runDate, model
                           </span>
                         )}
                         <div>
-                          <a
-                            href={`${OATF_BASE_URL}/${s.id}/`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="font-mono text-xs text-primary-600 dark:text-primary-400 hover:underline"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            {s.id}
-                          </a>
+                          {hasTraces ? (
+                            <span className="font-mono text-xs text-primary-600 dark:text-primary-400">{s.id}</span>
+                          ) : (
+                            <a
+                              href={`${OATF_SCENARIO_BASE_URL}/${s.id}/`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="font-mono text-xs text-primary-600 dark:text-primary-400 hover:underline"
+                            >
+                              {s.id}
+                            </a>
+                          )}
                           <span className="ml-2 text-gray-600 dark:text-gray-400 text-xs">{s.name}</span>
                         </div>
                       </div>
@@ -165,7 +167,7 @@ export function ScenarioTable({ scenarios, initialCategoryFilter, runDate, model
                       </td>
                     </tr>
                   )}
-                </>
+                </Fragment>
               );
             })}
           </tbody>
