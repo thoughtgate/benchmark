@@ -1,4 +1,4 @@
-import { GITHUB_REPO, THOUGHTJACK_URL, OATF_BASE_URL } from '@/lib/constants';
+import { GITHUB_REPO, THOUGHTJACK_URL, OATF_BASE_URL, OATF_SCENARIO_BASE_URL } from '@/lib/constants';
 
 export function Footer({ lastUpdated }: { lastUpdated?: string }) {
   return (
@@ -11,13 +11,16 @@ export function Footer({ lastUpdated }: { lastUpdated?: string }) {
           <a href={THOUGHTJACK_URL} target="_blank" rel="noopener noreferrer" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
             ThoughtJack
           </a>
+          <a href={OATF_SCENARIO_BASE_URL} target="_blank" rel="noopener noreferrer" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+            OATF scenarios
+          </a>
           <a href={OATF_BASE_URL} target="_blank" rel="noopener noreferrer" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
-            OATF
+            OATF specification
           </a>
         </div>
         <div>
           {lastUpdated && <span>Last updated {lastUpdated} &middot; </span>}
-          Built with ThoughtJack
+          Executed with ThoughtJack
         </div>
       </div>
     </footer>

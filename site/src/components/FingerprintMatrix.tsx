@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { Fragment, useState, useMemo } from 'react';
 import type { ModelResult } from '@/lib/types';
 import type { MatrixData } from '@/lib/fingerprint';
 import { SURFACE_LABELS, TECHNIQUE_LABELS, TIER_COLORS } from '@/lib/constants';
@@ -77,8 +77,8 @@ export function FingerprintMatrix({ matrixData, models }: Props) {
           </thead>
           <tbody>
             {surfaces.map((surface) => (
-              <>
-                <tr key={surface}>
+              <Fragment key={surface}>
+                <tr>
                   <td
                     className="px-2 py-2 font-medium text-gray-600 dark:text-gray-300 whitespace-nowrap cursor-pointer hover:text-primary-600 dark:hover:text-primary-400 sticky left-0 bg-white dark:bg-[#09090b] z-10"
                     onClick={() => setExpandedSurface(expandedSurface === surface ? null : surface)}
@@ -146,7 +146,7 @@ export function FingerprintMatrix({ matrixData, models }: Props) {
                     </td>
                   </tr>
                 )}
-              </>
+              </Fragment>
             ))}
           </tbody>
         </table>

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { GoogleAnalytics } from '@/components/GoogleAnalytics';
 import { getLatestRun } from '@/lib/data';
 import './globals.css';
 
@@ -21,6 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="min-h-screen bg-white dark:bg-[#09090b] text-gray-900 dark:text-zinc-100">
+        {process.env.NODE_ENV === 'production' && <GoogleAnalytics />}
         <ThemeProvider>
           <Navbar />
           <main className="max-w-7xl mx-auto px-4 py-8">{children}</main>

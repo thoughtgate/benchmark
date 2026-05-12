@@ -1,6 +1,6 @@
 import { getLatestRun } from '@/lib/data';
 import { BenchmarkTable } from '@/components/BenchmarkTable';
-import { OATF_BASE_URL, THOUGHTJACK_URL } from '@/lib/constants';
+import { OATF_BASE_URL, OATF_SCENARIO_BASE_URL, THOUGHTJACK_URL } from '@/lib/constants';
 
 export default function Home() {
   const run = getLatestRun();
@@ -25,7 +25,7 @@ export default function Home() {
           Adversarial resistance benchmark for AI agents
         </h1>
         <p className="mt-3 text-lg text-gray-600 dark:text-zinc-400 max-w-3xl leading-relaxed">
-          Measuring how frontier LLMs resist adversarial attacks
+          Measuring how LLMs resist adversarial attacks
           across MCP, A2A, and AG-UI agentic protocols.
         </p>
 
@@ -49,11 +49,15 @@ export default function Home() {
         </div>
 
         <p className="mt-4 text-sm text-gray-400 dark:text-zinc-600">
-          Based on the{' '}
+          Runs {' '}
+          <a href={OATF_SCENARIO_BASE_URL} target="_blank" rel="noopener noreferrer" className="text-primary-600 dark:text-primary-400 hover:underline">
+            OATF scenarios
+          </a>
+          {' '}based on the{' '}
           <a href={OATF_BASE_URL} target="_blank" rel="noopener noreferrer" className="text-primary-600 dark:text-primary-400 hover:underline">
             OATF specification
           </a>
-          . Built with{' '}
+          .  Executed with{' '}
           <a href={THOUGHTJACK_URL} target="_blank" rel="noopener noreferrer" className="text-primary-600 dark:text-primary-400 hover:underline">
             ThoughtJack
           </a>

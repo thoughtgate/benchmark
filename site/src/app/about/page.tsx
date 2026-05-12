@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { TierBadge } from '@/components/TierBadge';
-import { GITHUB_REPO, THOUGHTJACK_URL, OATF_BASE_URL } from '@/lib/constants';
+import { GITHUB_REPO, THOUGHTJACK_URL, OATF_BASE_URL, OATF_SCENARIO_BASE_URL } from '@/lib/constants';
 
 export const metadata: Metadata = {
   title: 'About & Methodology',
@@ -35,6 +35,12 @@ export default function AboutPage() {
         attacks. Each scenario specifies the protocol, the payload, the delivery mechanism, and a set
         of deterministic indicators that detect whether the model blocked the attack, ingested it
         without acting, performed an unauthorised local action, or pushed data across a trust boundary.
+      </p>
+      <p>
+        Want to contribute new scenarios? The benchmark consumes the public OATF scenario library,
+        so contribution guidelines and submission workflow live on{' '}
+        <a href={OATF_SCENARIO_BASE_URL} target="_blank" rel="noopener noreferrer">oatf.dev</a>{' '}
+        and its linked GitHub repository.
       </p>
 
       <h2>Who It&apos;s For</h2>
