@@ -5,7 +5,6 @@ import Link from 'next/link';
 import type { ModelResult, SortDirection } from '@/lib/types';
 import { CATEGORY_SHORT_NAMES, PROVIDER_NAMES } from '@/lib/constants';
 import { rankModels, scoreToBg } from '@/lib/scoring';
-import { TypeBadge } from './TypeBadge';
 
 interface Props {
   models: ModelResult[];
@@ -15,7 +14,6 @@ const FIXED_COLUMNS = [
   { key: 'rank', label: '#', sortable: false },
   { key: 'model', label: 'Model', sortable: false },
   { key: 'provider', label: 'Provider', sortable: false },
-  { key: 'type', label: 'Type', sortable: false },
   { key: 'aggregate', label: 'Resistance', sortable: true },
   { key: 'utility_score', label: 'Utility', sortable: true },
 ];
@@ -65,7 +63,6 @@ export function BenchmarkTable({ models }: Props) {
             <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider w-8">#</th>
             <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider">Model</th>
             <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider hidden lg:table-cell">Provider</th>
-            <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider hidden md:table-cell">Type</th>
             <SortHeader field="aggregate" label="Resistance" />
             <SortHeader field="utility_score" label="Utility" />
             {categoryNames.map((name) => (
@@ -104,9 +101,6 @@ export function BenchmarkTable({ models }: Props) {
               </td>
               <td className="px-3 py-2 text-gray-500 dark:text-gray-400 hidden lg:table-cell">
                 {PROVIDER_NAMES[model.provider] ?? model.provider}
-              </td>
-              <td className="px-3 py-2 hidden md:table-cell">
-                <TypeBadge type={model.type} />
               </td>
               <ScoreCell score={model.aggregate} />
               <ScoreCell score={model.utility_score} />

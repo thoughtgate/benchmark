@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getLatestRun, getAllModelIds, getModelHistory } from '@/lib/data';
-import { TypeBadge } from '@/components/TypeBadge';
 import { ScenarioTable } from '@/components/ScenarioTable';
 import { CategoryBarWrapper } from '@/components/CategoryBarWrapper';
 import { HistoryChartWrapper } from '@/components/HistoryChartWrapper';
@@ -64,10 +63,7 @@ export default async function ModelPage({ params }: { params: Promise<{ id: stri
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end gap-4">
         <div className="flex-1">
-          <div className="flex items-center gap-3 mb-1">
-            <h1 className="text-3xl font-bold">{model.display_name}</h1>
-            <TypeBadge type={model.type} />
-          </div>
+          <h1 className="text-3xl font-bold mb-1">{model.display_name}</h1>
           <p className="text-gray-500 dark:text-gray-400 text-sm">
             {PROVIDER_NAMES[model.provider] ?? model.provider} &middot; Last tested {run.metadata.date}
           </p>
