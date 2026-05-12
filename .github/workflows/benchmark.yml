@@ -7,7 +7,8 @@ on:
         required: false
 
 permissions:
-  contents: read
+  contents: write
+  pull-requests: write
 
 jobs:
   preflight-and-baseline:
@@ -318,6 +319,8 @@ jobs:
       - name: Create PR
         uses: peter-evans/create-pull-request@v6
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          base: main
           branch: benchmark/${{ github.run_id }}
           title: "Benchmark pass — ${{ env.RUN_DIR }}"
           body-path: /tmp/pr-body.md
