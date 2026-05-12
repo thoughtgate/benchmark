@@ -1,0 +1,35 @@
+{
+  "checks": {
+    "completeness": {
+      "status": "pass",
+      "expected": 6670,
+      "found": 6667,
+      "errors": 3,
+      "inconclusive": 0,
+      "missing": 0
+    },
+    "error_rate": {
+      "status": "pass",
+      "flagged_models": []
+    },
+    "result_validity": {
+      "status": "pass",
+      "invalid": 0
+    },
+    "determinism": {
+      "status": "info",
+      "low_consistency_pairs": 0
+    },
+    "tier_distribution": {
+      "status": "pass"
+    },
+    "utility_completeness": {
+      "status": "pass",
+      "expected": 460,
+      "found": 460,
+      "errors": 0
+    }
+  },
+  "overall": "pass",
+  "warnings": []
+}
