@@ -4,15 +4,34 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { GoogleAnalytics } from '@/components/GoogleAnalytics';
 import { getLatestRun } from '@/lib/data';
+import { SITE_URL } from '@/lib/constants';
 import './globals.css';
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
     default: 'ThoughtJack AI Agent Security Benchmark',
     template: '%s | ThoughtJack Benchmark',
   },
   description:
     'How resistant are frontier LLMs to adversarial attacks on MCP, A2A, and AG-UI protocols? We test 57 scenarios against 20 models.',
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    type: 'website',
+    url: SITE_URL,
+    title: 'ThoughtJack AI Agent Security Benchmark',
+    description:
+      'How resistant are frontier LLMs to adversarial attacks on MCP, A2A, and AG-UI protocols? We test 57 scenarios against 20 models.',
+    siteName: 'ThoughtJack Benchmark',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'ThoughtJack AI Agent Security Benchmark',
+    description:
+      'How resistant are frontier LLMs to adversarial attacks on MCP, A2A, and AG-UI protocols? We test 57 scenarios against 20 models.',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

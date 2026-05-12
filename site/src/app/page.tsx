@@ -1,6 +1,6 @@
 import { getLatestRun } from '@/lib/data';
 import { BenchmarkTable } from '@/components/BenchmarkTable';
-import { OATF_BASE_URL, OATF_SCENARIO_BASE_URL, THOUGHTJACK_URL } from '@/lib/constants';
+import { OATF_BASE_URL, OATF_SCENARIO_BASE_URL, THOUGHTJACK_URL, SITE_URL } from '@/lib/constants';
 
 export default function Home() {
   const run = getLatestRun();
@@ -16,9 +16,35 @@ export default function Home() {
 
   const scenarioCount = run.models[0]?.scenarios.length ?? 57;
   const categoryCount = run.models[0]?.categories.length ?? 7;
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Dataset',
+    name: 'ThoughtJack AI Agent Security Benchmark',
+    description:
+      'Adversarial resistance benchmark for AI agents across MCP, A2A, and AG-UI protocols.',
+    url: SITE_URL,
+    creator: {
+      '@type': 'Organization',
+      name: 'ThoughtJack',
+      url: THOUGHTJACK_URL,
+    },
+    variableMeasured: [
+      'Injection Resistance',
+      'Exfiltration Resistance',
+      'Privilege Integrity',
+      'Instruction Fidelity',
+      'Information Boundary',
+      'Social Engineering',
+      'Availability',
+    ],
+    measurementTechnique: 'Worst-case tier across repeated OATF scenario runs',
+    keywords: ['OATF', 'MCP', 'A2A', 'AG-UI', 'LLM security benchmark'],
+    dateModified: run.metadata.date,
+  };
 
   return (
     <div className="space-y-12">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       {/* Hero */}
       <div className="pt-4 pb-2">
         <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 dark:text-zinc-100">

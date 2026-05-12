@@ -16,8 +16,36 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   const run = getLatestRun();
   const model = run?.models.find((m) => m.id === id);
+
+  if (!model) {
+    return {
+      title: 'Model Detail',
+      description: 'Security benchmark details for a model tested with OATF attack scenarios.',
+      alternates: {
+        canonical: `/model/${id}/`,
+      },
+    };
+  }
+
+  const description = `${model.display_name} resistance score ${model.aggregate.toFixed(1)} and utility score ${model.utility_score.toFixed(1)} in the ThoughtJack AI agent security benchmark.`;
+
   return {
-    title: model ? `${model.display_name} Security Score` : 'Model Detail',
+    title: `${model.display_name} Security Score`,
+    description,
+    alternates: {
+      canonical: `/model/${id}/`,
+    },
+    openGraph: {
+      title: `${model.display_name} Security Score`,
+      description,
+      type: 'article',
+      url: `/model/${id}/`,
+    },
+    twitter: {
+      card: 'summary',
+      title: `${model.display_name} Security Score`,
+      description,
+    },
   };
 }
 

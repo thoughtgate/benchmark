@@ -1,4 +1,4 @@
-# bench.thoughtjack.io — Website Spec
+# benchmark.thoughtjack.io — Website Spec
 
 ## Overview
 
@@ -296,7 +296,7 @@ Include Open Graph images for social sharing — auto-generated cards showing th
 ## File structure
 
 ```
-bench.thoughtjack.io/
+benchmark.thoughtjack.io/
 ├── src/
 │   ├── app/
 │   │   ├── page.tsx                    # Landing / benchmark table

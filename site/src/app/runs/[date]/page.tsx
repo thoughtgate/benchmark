@@ -10,7 +10,29 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ date: string }> }): Promise<Metadata> {
   const { date } = await params;
-  return { title: `Benchmark Run ${date}` };
+  const run = getRun(date);
+  const description = run
+    ? `${run.models.length} models benchmarked on ${date}. ThoughtJack v${run.metadata.thoughtjack_version}, scenario set ${run.metadata.scenario_set_version}.`
+    : `ThoughtJack benchmark run results for ${date}.`;
+
+  return {
+    title: `Benchmark Run ${date}`,
+    description,
+    alternates: {
+      canonical: `/runs/${date}/`,
+    },
+    openGraph: {
+      title: `Benchmark Run ${date}`,
+      description,
+      type: 'article',
+      url: `/runs/${date}/`,
+    },
+    twitter: {
+      card: 'summary',
+      title: `Benchmark Run ${date}`,
+      description,
+    },
+  };
 }
 
 export default async function RunDetailPage({ params }: { params: Promise<{ date: string }> }) {
