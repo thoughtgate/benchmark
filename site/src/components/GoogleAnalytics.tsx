@@ -11,7 +11,7 @@ declare global {
   }
 }
 
-const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+const GA_MEASUREMENT_ID = 'G-5J5103V0T0';
 
 export function GoogleAnalytics() {
   const pathname = usePathname();
@@ -24,8 +24,6 @@ export function GoogleAnalytics() {
 
     window.gtag('config', GA_MEASUREMENT_ID, { page_path: pagePath });
   }, [pathname]);
-
-  if (!GA_MEASUREMENT_ID) return null;
 
   return (
     <>
